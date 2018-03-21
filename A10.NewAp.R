@@ -4,8 +4,9 @@
   # 2 - Buffer of different categories (50 km - 100 km - 150 km)
   # 3 - Create random points within the buffer
   # 4 - Extract habitat characteristics
-  # 5 - Clustering 6C and/OR Distance metric
-  # 6 - CLR
+  # 5 - Sort natal-established-available
+  # 6 - Clustering 6C and/OR Distance metric
+  # 7 - CLR
 rm(list = ls())
 library(sp)
 library(rgdal)
@@ -14,9 +15,9 @@ library(raster)
 
 # --------------- 1 Straight line from natal to established -------------------------- #
 
-setwd("~/MASTER THESIS/Data")
+setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data")
 
-disper <- read.delim("~/MASTER THESIS/Data/dispersal_p.txt")
+disper <- read.delim("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/dispersal_p.txt")
 
 nat<-disper[ ,c("X_birth","Y_birth")]
 est<-disper[ ,c("X_Established","Y_Established")]
@@ -34,7 +35,7 @@ for (i in seq_along(l)) {
 
     # Plot 
 
-    setwd("~/MASTER THESIS/Data/GIS")
+    setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/GIS")
     study_area <- readOGR(".", "hand_study_area1")
     proj4string(study_area)
     plot(study_area)
@@ -74,7 +75,7 @@ proj4string(buf) <- proj4string(study_area)
 # --------------- 3 Create random points within the buffer -------------------------- #
   
 
-  setwd("~/MASTER THESIS/Data/Random walks")
+  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/Random walks")
   load("Buffer.RData") #b: Data buffers occupied
   proj4string(b) <- proj4string(study_area)
   
@@ -95,17 +96,15 @@ proj4string(buf) <- proj4string(study_area)
     g[[j]]<-o
   }
   
-  setwd("~/MASTER THESIS/Publication/Datos")
+  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos")
   save(g,file = "availablePointsBuffer.RData")
   
   # --------------- 4 Extract habitat characteristics -------------------------- #
   
-  setwd("~/MASTER THESIS/Data/Random walks")
+  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/Random walks")
   load("stack.RData")
-  proj4string(stack)
-  extent(stack)
-  proj4string(g[[1]][[1]])
-  setwd("~/MASTER THESIS/Publication/Datos")
+  
+  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos")
   load("availablePointsBuffer.RData")
   
   u<-list()
@@ -121,40 +120,44 @@ proj4string(buf) <- proj4string(study_area)
     u[[j]]<-o
   }
   
-  #?????????  Error in .local(.Object, ...) : 
- # 14.
- # .local(.Object, ...) 
- # 13.
- # initialize(value, ...) 
- # 12.
- # initialize(value, ...) 
- # 11.
- # new("GDALReadOnlyDataset", filename, silent = silent, allowedDrivers = allowedDrivers, 
- #     options = options) 
- # 10.
- # rgdal::GDAL.open(object@file@name, silent = TRUE) 
- # 9.
- # .readRasterLayerValues(xx, row, nrows, col, ncols) 
- # 8.
- # .local(x, ...) 
- # 7.
- # getValuesBlock(object, rn[i], rx[i] - rn[i] + 1, cn[i], cx[i] - 
- #                  cn[i] + 1) 
- # 6.
- # getValuesBlock(object, rn[i], rx[i] - rn[i] + 1, cn[i], cx[i] - 
- #                  cn[i] + 1) 
- # 5.
- # .xyvBuf(object, xy, buffer, fun, na.rm, layer = layer, nl = nl, 
- #         cellnumbers = cellnumbers, small = small) 
- # 4.
- # .xyValues(x, coordinates(y), ..., df = TRUE) 
- # 3.
- # .local(x, y, ...) 
- # 2.
- # extract(stack, g[[j]][[i]], method = "simple", buffer = 17841, 
- #         small = TRUE, fun = mean, na.rm = TRUE, df = TRUE, factors = TRUE, 
- #         sp = TRUE) 
- # 1.
- # extract(stack, g[[j]][[i]], method = "simple", buffer = 17841, 
- #         small = TRUE, fun = mean, na.rm = TRUE, df = TRUE, factors = TRUE, 
- #         sp = TRUE) #
+  save(u,file = "extracted_values_available.RData") 
+  
+  # --------------- 5. Sort extracted -------------------------- #
+  
+  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") # Extracted available to data frame
+  load("extracted_values_available.RData")
+  
+  hey <- u[[1]][[1]] 
+  hey<- as.data.frame((hey))
+  hey[1,] <- rep(NA, ncol(hey))
+  hey$ID <- 0
+  hey$ID_rand <- 0
+  
+  row.names(hey)<- 1
+  
+  for ( i in 1:length(u)){
+    
+    for ( j in 1:length(u[[i]])){
+      tmp <- as.data.frame(u[[i]][[j]])[1,]
+      row.names(tmp)  <- as.numeric(row.names(hey)[nrow(hey)])+1
+      hey[(nrow(hey)+1) , 1: (ncol(hey)-2) ]  <- tmp
+      
+      hey$ID[(nrow(hey))] <- i
+      hey$ID_rand[(nrow(hey))] <- j
+    }
+  }
+  hey<-hey[-c(1),]
+  Category <- vector(mode='numeric', length=271)
+  hey <- data.frame(hey, Category)
+  hey$Category<-factor(hey$Category,labels = "Available")
+  
+  
+  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data") # Join to natal/established
+  e<-read.csv(file="extracted_values_NatEst",header=TRUE)
+  
+  ext<-bind_rows(hey,e)
+  ext<-arrange(ext,ID, Category)
+
+    
+  
+  
