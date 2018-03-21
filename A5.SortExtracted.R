@@ -2,6 +2,7 @@
 
 rm(list=ls())
 setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Multivariate")
+setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/Multivariate")
 disper <- read.delim("C:/Users/Ana/Desktop/MASTER THESIS/Data/dispersal_p.txt")
 
 #Join extracted values for established and natal territories with
@@ -30,7 +31,14 @@ e$y<-disper$Y_Established
 #Join natal and established
 library(dplyr)
 ne<-bind_rows(n,e)
+    #SAVE NATAL_ESTABLISHED IN ORDER FOR ANALYSIS NEW APPROACH
+    #ny <- arrange(ne, ID, Category)
+    #setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data")
+    #write.csv(ny,file="extracted_values_NatEst")
 ne<-arrange(ne,ID_individual)
+
+
+
 
 #List of available extracted values converted to matrix.
 load("available_values_final.RData")
