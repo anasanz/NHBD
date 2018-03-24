@@ -203,7 +203,7 @@ proj4string(buf) <- proj4string(study_area)
   e <- as.data.frame(e)
   e$moose_dens <- unlist(e$moose_dens)
   setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
-  write.csv(e,file="all_extracted_buffer")
+  write.csv(e,file="all_extracted_buffer.csv")
   
   # --------------- 6. Distance metric and CLR -------------------------- #
     
