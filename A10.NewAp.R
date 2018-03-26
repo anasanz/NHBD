@@ -5,8 +5,8 @@
   # 3 - Create random points within the buffer
   # 4 - Extract habitat characteristics
   # 5 - Sort natal-established-available
-  # 6 - Distance metric and CLR
-  # 7 - 6 clusters kmeans and CLR
+  # 6.1 - Distance metric and CLR
+  # 6.2 - 6 clusters kmeans and CLR
 
 rm(list = ls())
 library(sp)
@@ -59,12 +59,12 @@ for (i in seq_along(l)) {
 spl <- SpatialLines(l)
 
 
-# --------------- 2 Buffer of different categories (50 km - 100 km - 150 km) -------------------------- #
+# --------------- 2 Buffer of 25 km width -------------------------- #
 
 buf <- gBuffer(spl,byid = TRUE, width = 25000)
 proj4string(buf) <- proj4string(study_area)
 
-  plot(study_area)
+  plot(study_area) #plot it
   plot(spl[1], add = TRUE)
   plot(buf[1], add = TRUE)
   plot(g[[1]][[1]], add = TRUE)
@@ -74,7 +74,7 @@ proj4string(buf) <- proj4string(study_area)
   for (i in seq_along(spl)) {
     plot(spl[i], add = TRUE)
     plot(buf[i], add = TRUE)
-  }
+     }
 
 # --------------- 3 Create random points within the buffer -------------------------- #
   
@@ -129,12 +129,12 @@ proj4string(buf) <- proj4string(study_area)
   
   # --------------- 5. Sort extracted -------------------------- #
   
-  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") # Extracted available to data frame
+  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") 
   setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
   
   load("extracted_values_available.RData")
   
-  hey <- u[[1]][[1]] 
+  hey <- u[[1]][[1]] # Extracted list of available territories to data frame
   hey<- as.data.frame((hey))
   hey[1,] <- rep(NA, ncol(hey))
   hey$ID <- 0
@@ -162,11 +162,12 @@ proj4string(buf) <- proj4string(study_area)
   setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data") 
   setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
   
-  e<-read.csv(file="extracted_values_NatEst",header=TRUE)
+  e<-read.csv(file="extracted_values_NatEst",header=TRUE) # Load extracted from natal and established to
+                                                          #to obtain ids for available in order
   
   library(splitstackshape)
   id <- e[e$Category == "Natal", c(33:38)] # Get IDs in data frame with available territories
-  id<-expandRows(id,11,count.is.col = FALSE)
+  id<-expandRows(id,11,count.is.col = FALSE) # 11 values of the same id to join to available (hey)
   hey$ID_individual<-id$ID_individual
   hey$Year<-id$Year
   hey$Sex<-id$Sex
@@ -193,7 +194,7 @@ proj4string(buf) <- proj4string(study_area)
   ext<-ext[,-c(9:22)]
   str(ext)
   
-  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") #Join to wolf density
+  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") #Join to wolf density variable
   setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
   
   w<-read.csv("Data_NHBD_id_wolf_density.csv")
@@ -205,11 +206,12 @@ proj4string(buf) <- proj4string(study_area)
   setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
   write.csv(e,file="all_extracted_buffer.csv")
   
-  # --------------- 6. Distance metric and CLR -------------------------- #
+  # --------------- 6.1. Distance metric and CLR -------------------------- #
     
   library(survival)
   
-  head(e)
+  # Euclidean distance metric between territories #
+  
   e1 <- as.data.frame(e[,c("Year","human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
                            "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
                            "roughness_1", "roadbuild_1", "moose_dens")])
@@ -230,6 +232,8 @@ proj4string(buf) <- proj4string(study_area)
     
   }
   
+  # CLR #
+  
   e$Category <- as.character(e$Category)
   
   cd <- e[e$Category!="Natal",]
@@ -246,7 +250,9 @@ proj4string(buf) <- proj4string(study_area)
   #When the distance increases (i.e., less similar territories), 
   #the probability of having the event increases: NO NHBD WITH THIS BUFFER SIZE
   
-  # --------------- 7. 6 clusters and CLR ?-------------------------- #
+  
+  
+  # --------------- 6.2. 6 clusters and CLR -------------------------- #
   
   e <- e[ ,-c(23)] #Remove buildings
   e <- e[ ,c(1:4,6:8,5,9:24)]
@@ -254,10 +260,13 @@ proj4string(buf) <- proj4string(study_area)
   sd_e<- as.data.frame(scale(e[ ,c(8:23)]))
   pc <- prcomp(sd_e)
   comp <- data.frame(pc$x[,1:5])
-  #6 KMEANS
+  
+  # 6 K-MEANS
   k6 <- kmeans(comp, 6, nstart=25, iter.max=1000)
   e$Clusters <- k6$cluster  
+  
 
+  # Prepare data for CLR (one data frame for individuals born in each cluster)
   
   library(survival)
   #CLUSTER 1
@@ -419,6 +428,8 @@ proj4string(buf) <- proj4string(study_area)
   
   #JOIN DATASETS
   clr <- rbind( b1,b2,b3,b4,b5,b6)
+  
+  # CLR #
   
   c <- clogit(Category ~ Clusters + E + wolf_density + wolf_density * E  + Sex * E + strata(ID_individual), clr)
   summary(c) # NO NHBD
