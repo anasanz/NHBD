@@ -166,7 +166,7 @@ u <- list()
     #   
     #   o[[i]] <- a_v
     # }
-    mySamples <- clusterApply(cl, 1:11, extract.wrapper)
+    o <- clusterApply(cl, 1:11, extract.wrapper)
     
     print(j)
     
