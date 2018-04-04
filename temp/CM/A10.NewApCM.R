@@ -106,7 +106,7 @@ proj4string(buf) <- proj4string(study_area)
   # --------------- 4 Extract habitat characteristics -------------------------- #
   
   #setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/Random walks")
-  load("C:/My_documents/ana/nhbd/NHBD/Data/stack.RData")
+  stack <- stack("stack.tif")
   # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos")
   # load("availablePointsBuffer.RData")
   
@@ -123,14 +123,14 @@ proj4string(buf) <- proj4string(study_area)
     u[[j]]<-o
   }
   
-  save(u,file = "extracted_values_available.RData") 
-  
-  # --------------- 5. Sort extracted -------------------------- #
-  
-  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") 
-  setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
-  
-  load("extracted_values_available.RData")
+  # save(u,file = "extracted_values_available.RData") 
+  # 
+  # # --------------- 5. Sort extracted -------------------------- #
+  # 
+  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") 
+  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+  # 
+  # load("extracted_values_available.RData")
   
   hey <- u[[1]][[1]] # Extracted list of available territories to data frame
   hey<- as.data.frame((hey))
@@ -156,11 +156,11 @@ proj4string(buf) <- proj4string(study_area)
   hey <- data.frame(hey, Category)
   hey$Category<-factor(hey$Category,labels = "Available")
   
-  
-  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data") 
-  setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
-  
-  e<-read.csv(file="extracted_values_NatEst",header=TRUE) # Load extracted from natal and established to
+  # 
+  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data") 
+  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
+  # 
+  e<-read.csv(file="extracted_values_NatEst.csv",header=TRUE) # Load extracted from natal and established to
                                                           #to obtain ids for available in order
   
   library(splitstackshape)
@@ -188,22 +188,21 @@ proj4string(buf) <- proj4string(study_area)
     ext$moose_dens[i]<- moose[i, which(YEAR==ext$Year[i])]
   }
   
-  View(ext)
   ext<-ext[,-c(9:22)]
   str(ext)
   
-  setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") #Join to wolf density variable
-  setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
-  
+  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") #Join to wolf density variable
+  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+  # 
   w<-read.csv("Data_NHBD_id_wolf_density.csv")
   w <- w[,c(4,6,10,11,28)]
   
   e <- left_join(ext,w)
   e <- as.data.frame(e)
   e$moose_dens <- unlist(e$moose_dens)
-  setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
-  write.csv(e,file="all_extracted_buffer.csv")
-  
+  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+  # write.csv(e,file="all_extracted_buffer.csv")
+  # 
   # --------------- 6.1. Distance metric and CLR -------------------------- #
     
   library(survival)
