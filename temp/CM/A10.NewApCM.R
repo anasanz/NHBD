@@ -22,7 +22,7 @@ library(snow)
 setwd("C:/My_documents/ana/nhbd/NHBD/Data")
 
 
-## LOAD NECESSARY DATA
+## ==== I. LOAD NECESSARY DATA ====
 
 # THE STUDY AREA 
 study_area <- readOGR(".", "hand_study_area1")
@@ -124,11 +124,11 @@ plot(clip, add=T)
     g[[j]] <- o
   }
  
-  ## ---- 4. EXTRACT HABITAT CHARACTERISTICS  ----
-  
-  
-  ## parralell the processes
-  N.CORES = 5 
+## ---- 4. EXTRACT HABITAT CHARACTERISTICS  ----
+  ## PARRALLEL THE LOOP 
+  # DEFINE NUMBER OF CORES 
+  N.CORES = 6 
+  # MAKE WRAPPER FUNCTION FOR THE CLUSTER APPLY
   extract.wrapper <- function(x){
     a_v <- raster::extract(stack, g[[j]][[x]], method='simple', buffer=17841,
             small=TRUE, fun=mean, na.rm=TRUE, df=TRUE, factors=TRUE,
@@ -136,20 +136,22 @@ plot(clip, add=T)
     return(a_v)
   }
   
+  # START THE CLUSTER AND SEND DATA AND LIBRARIES 
   cl <- makeCluster(N.CORES, "SOCK")
   clusterExport(cl, c("stack","g", "j"), envir = environment(NULL))  
   clusterEvalQ(cl, library(raster))
 
+  # START THE LOOP 
 u <- list()
   for(j in 1:271){
     o <- list()
     # for (i in 1:11){
-      time <-proc.time()
-      a_v <- extract(stack, g[[j]][[i]], method='simple', buffer=17841,
-                   small=TRUE, fun=mean, na.rm=TRUE, df=TRUE, factors=TRUE,
-                   sp=TRUE)
-    #   # alternative 
-      time1 <- proc.time()-time
+    #   time <-proc.time()
+    #   a_v <- extract(stack, g[[j]][[i]], method='simple', buffer=17841,
+    #                small=TRUE, fun=mean, na.rm=TRUE, df=TRUE, factors=TRUE,
+    #                sp=TRUE)
+    # #   # alternative 
+    #   time1 <- proc.time()-time
 
       # time <-proc.time()
       # bu <- gBuffer(g[[j]][[i]], width = 17841 )
@@ -172,14 +174,9 @@ u <- list()
   }
 stopCluster(cl)
 
-  # save(u,file = "extracted_values_available.RData") 
-  # 
-  # # --------------- 5. Sort extracted -------------------------- #
-  # 
-  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") 
-  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
-  # 
-  # load("extracted_values_available.RData")
+
+## ---- 5. Sort extracted ---- 
+  
   
   hey <- u[[1]][[1]] # Extracted list of available territories to data frame
   hey<- as.data.frame((hey))
@@ -209,7 +206,7 @@ stopCluster(cl)
   # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data") 
   # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
   # 
-  e<-read.csv(file="extracted_values_NatEst.csv",header=TRUE) # Load extracted from natal and established to
+  e <- read.csv(file="extracted_values_NatEst.csv",header=TRUE) # Load extracted from natal and established to
                                                           #to obtain ids for available in order
   
   library(splitstackshape)
