@@ -1,5 +1,5 @@
 
-#New Approach to define availability
+# New Approach to define availability
   # 1 - Straight line from natal to established
   # 2 - Buffer of different categories (50 km - 100 km - 150 km)
   # 3 - Create random points within the buffer
@@ -8,121 +8,170 @@
   # 6.1 - Distance metric and CLR
   # 6.2 - 6 clusters kmeans and CLR
 
+## LOAD NECESSARY PACKAGES 
 rm(list = ls())
 library(sp)
 library(rgdal)
 library(rgeos)
 library(raster)
 library(dplyr)
-
-# --------------- 1 Straight line from natal to established -------------------------- #
-
+library(snow)
+## SET WORKING DIRECTORY 
 # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data")
 # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
 setwd("C:/My_documents/ana/nhbd/NHBD/Data")
 
+
+## LOAD NECESSARY DATA
+
+# THE STUDY AREA 
+study_area <- readOGR(".", "hand_study_area1")
+
+# LOAD SWEDEN AND NORWAY 
+COUNTRIES <- readOGR("countries.removed.islands.shp")       ## Detailed Map of Scandinavia (including Finland & parts of Russia)
+COUNTRIES <- COUNTRIES[which(COUNTRIES$ISO %in% c("NOR","SWE")),]              ## Just take Sweden and Norway 
+
+
+# LOAD THE BUFFER OF OCCUPIED TERRITORIES THE YEAR BEFORE ESTABLISHMENT 
+load("Buffer.RData") #b: Data buffers occupied territories the year before establishment
+proj4string(b) <- proj4string(study_area)
+
+# LOAD THE VEGETATION DATA 
+load("stack.RData")
+names.stack <- names(stack)
+stack <- stack("stack.tif")
+names(stack) <- names.stack
+
+## ---- 1. CREATE A STRAIGHT LINE FROM NATAL TO ESTABLISHED ---- 
+# LOAD THE DISPERSAL DATA
 disper <- read.delim("dispersal_p.txt")
 
-nat<-disper[ ,c("X_birth","Y_birth")]
-est<-disper[ ,c("X_Established","Y_Established")]
-
+# GET ESTABLISHED 
+nat <- disper[ ,c("X_birth","Y_birth")]
 colnames(nat)[1] <- "X"
 colnames(nat)[2] <- "Y"
+
+est <- disper[ ,c("X_Established","Y_Established")]
 colnames(est)[1] <- "X"
 colnames(est)[2] <- "Y"
 
+# CREATE THE SPLINES 
 l <- vector("list", nrow(nat))
 
 for (i in seq_along(l)) {
   l[[i]] <- Lines(list(Line(rbind(nat[i, ], est[i,]))), as.character(i))
 }
-
-    # Plot 
-
-    #setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/GIS")
-    study_area <- readOGR(".", "hand_study_area1")
-    proj4string(study_area)
-    plot(study_area)
-    
-    spl <- SpatialLines(l[1])
-    summary(spl)
-    plot(spl, add = TRUE)
-    points(nat[1, ])
-    points(est[1, ])
-    
-    spl <- SpatialLines(l[2])
-    summary(spl)
-    plot(spl, add = TRUE)
-    points(nat[2, ])
-    points(est[2, ])
-
 spl <- SpatialLines(l)
 
 
-# --------------- 2 Buffer of 25 km width -------------------------- #
+# PLOT TO CHECK 
+plot(study_area)
+# jus select a few of IDS
+ID <- sample(1:length(spl), 20)
+col <- rainbow(length(ID))
 
-buf <- gBuffer(spl,byid = TRUE, width = 25000)
+for(i in 1:length(ID)){
+  plot(spl[ID[i]], add = TRUE, col=col[i])
+  points(nat[ID[i], ], col=col[i])
+  points(est[ID[i], ], col=col[i])
+}
+
+
+## ---- 2. CREATE BUFFER AROUND LINES ----
+buf <- gBuffer(spl, byid = TRUE, width = 25000)
 proj4string(buf) <- proj4string(study_area)
 
-  plot(study_area) #plot it
-  plot(spl[1], add = TRUE)
-  plot(buf[1], add = TRUE)
-  plot(g[[1]][[1]], add = TRUE)
-  
-  plot(study_area)
-  for (i in 1: 40) {
-    plot(spl[i], add = TRUE)
-    plot(buf[i], add = TRUE)
-     }
+# PLOT TO CHECK 
+plot(study_area)
+# jus select a few of IDS
+ID <- sample(1:length(spl), 20)
+col <- rainbow(length(ID))
 
-# --------------- 3 Create random points within the buffer -------------------------- #
-  
+for(i in 1:length(ID)){
+  plot(spl[ID[i]], add = TRUE, col=col[i])
+  points(nat[ID[i], ], col=col[i])
+  points(est[ID[i], ], col=col[i])
+  plot(buf[ID[i], ], border=col[i], add=T)
+}
 
-  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/Random walks")
-  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Random walks")
-  load("Buffer.RData") #b: Data buffers occupied territories the year before establishment
-  proj4string(b) <- proj4string(study_area)
-  
-  g<-list()
+
+## ---- 3. DRAW RANDOM POINTS WITHIN THE BUFFER  ----
+# CLIP THE BUFFER SO RANDOM PTS ARE WITHIN THE STUDY AREA
+clip_buffer <- gIntersection(study_area, buf, byid = T)
+plot(study_area)
+plot(clip, add=T)
+
+  g <- list()
   for (j in 1:271){
-    o<- list()
+    o <- list()
     for (i in 1:11){
       repeat{
-        rdm_sp <- spsample(buf[j], 1,type="random", iter = 10) # sample 1 random point in line
-        ovr <- is.na(over(rdm_sp, b[b$year==(disper$Year.establishment[j]-1), 1])) 
+        rdm_sp <- spsample(clip_buffer[j], 1,type="random", iter = 10) # sample 1 random point in line
         #1. Select buffers of the year before the year of establishment (dispering)
+        ovr <- is.na(over(rdm_sp, b[b$year==(disper$Year.establishment[j]-1), 1])) 
         #2. Over: NA -> Doesnt overlap (TRUE)
         if (ovr==TRUE) break
+    
       }
       o[[i]] <- rdm_sp
+    # plot 
     }
+    plot(study_area)
+    points(do.call(rbind,o), col="red", pch=16)
+    plot(buf[j], border="red", add=T)
+    
     print(j)
-    g[[j]]<-o
+    g[[j]] <- o
+  }
+ 
+  ## ---- 4. EXTRACT HABITAT CHARACTERISTICS  ----
+  
+  
+  ## parralell the processes
+  N.CORES = 5 
+  extract.wrapper <- function(x){
+    a_v <- raster::extract(stack, g[[j]][[x]], method='simple', buffer=17841,
+            small=TRUE, fun=mean, na.rm=TRUE, df=TRUE, factors=TRUE,
+            sp=TRUE)
+    return(a_v)
   }
   
-  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos")
-  # save(g,file = "availablePointsBuffer.RData")
-  # 
-  # --------------- 4 Extract habitat characteristics -------------------------- #
-  
-  #setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data/Random walks")
-  stack <- stack("stack.tif")
-  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos")
-  # load("availablePointsBuffer.RData")
-  
-  u<-list()
+  cl <- makeCluster(N.CORES, "SOCK")
+  clusterExport(cl, c("stack","g", "j"), envir = environment(NULL))  
+  clusterEvalQ(cl, library(raster))
+
+u <- list()
   for(j in 1:271){
-    o<-list()
-    for (i in 1:11){
-      a_v <- extract(stack[[1]], g[[j]][[i]], method='simple', buffer=17841,
+    o <- list()
+    # for (i in 1:11){
+      time <-proc.time()
+      a_v <- extract(stack, g[[j]][[i]], method='simple', buffer=17841,
                    small=TRUE, fun=mean, na.rm=TRUE, df=TRUE, factors=TRUE,
                    sp=TRUE)
-      o[[i]]<-a_v
-    }
+    #   # alternative 
+      time1 <- proc.time()-time
+
+      # time <-proc.time()
+      # bu <- gBuffer(g[[j]][[i]], width = 17841 )
+      # r <- stack[[1]]
+      # #plot(r)
+      # r.crop <- mask(r ,bu )
+      # cell.id <- which(!is.na(r.crop[]))
+      # time <-proc.time()
+      # 
+      # a_v <- colMeans(stack[cell.id], na.rm = T)
+      # time2 <-proc.time()-time
+    #   
+    #   o[[i]] <- a_v
+    # }
+    mySamples <- clusterApply(cl, 1:11, extract.wrapper)
+    
     print(j)
-    u[[j]]<-o
+    
+    u[[j]] <- o
   }
-  
+stopCluster(cl)
+
   # save(u,file = "extracted_values_available.RData") 
   # 
   # # --------------- 5. Sort extracted -------------------------- #
