@@ -1,4 +1,4 @@
-
+## ====  ====
 # New Approach to define availability
   # 1 - Straight line from natal to established
   # 2 - Buffer of different categories (50 km - 100 km - 150 km)
@@ -14,14 +14,18 @@ library(sp)
 library(rgdal)
 library(rgeos)
 library(raster)
+library(survival)
 library(dplyr)
 library(snow)
+library(splitstackshape)
+
 ## SET WORKING DIRECTORY 
 # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data")
 # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
 setwd("C:/My_documents/ana/nhbd/NHBD/Data")
 
-
+buffer.size <- c(25000, 75000, 125000, 175000, 250000)
+for(xxx in 1:length(buffer.size)){
 ## ==== I. LOAD NECESSARY DATA ====
 
 # THE STUDY AREA 
@@ -35,6 +39,13 @@ COUNTRIES <- COUNTRIES[which(COUNTRIES$ISO %in% c("NOR","SWE")),]              #
 # LOAD THE BUFFER OF OCCUPIED TERRITORIES THE YEAR BEFORE ESTABLISHMENT 
 load("Buffer.RData") #b: Data buffers occupied territories the year before establishment
 proj4string(b) <- proj4string(study_area)
+
+# LOAD EXTRACTED FROM NATAL AND ESTABLISHED 
+e <- read.csv(file="extracted_values_NatEst.csv", header=TRUE) 
+
+# LOAD WOLF DENSITY
+w <- read.csv("Data_NHBD_id_wolf_density.csv")
+
 
 # LOAD THE VEGETATION DATA 
 load("stack.RData")
@@ -78,7 +89,9 @@ for(i in 1:length(ID)){
 
 
 ## ---- 2. CREATE BUFFER AROUND LINES ----
-buf <- gBuffer(spl, byid = TRUE, width = 25000)
+
+  
+buf <- gBuffer(spl, byid = TRUE, width = buffer.size[xxx])
 proj4string(buf) <- proj4string(study_area)
 
 # PLOT TO CHECK 
@@ -99,7 +112,7 @@ for(i in 1:length(ID)){
 # CLIP THE BUFFER SO RANDOM PTS ARE WITHIN THE STUDY AREA
 clip_buffer <- gIntersection(study_area, buf, byid = T)
 plot(study_area)
-plot(clip, add=T)
+
 
   g <- list()
   for (j in 1:271){
@@ -175,116 +188,87 @@ u <- list()
 stopCluster(cl)
 
 
-## ---- 5. Sort extracted ---- 
-  
-  
-  hey <- u[[1]][[1]] # Extracted list of available territories to data frame
-  hey<- as.data.frame((hey))
-  hey[1,] <- rep(NA, ncol(hey))
-  hey$ID <- 0
-  hey$ID_rand <- 0
-  
-  row.names(hey)<- 1
-  
-  for ( i in 1:length(u)){
-    
-    for ( j in 1:length(u[[i]])){
-      tmp <- as.data.frame(u[[i]][[j]])[1,]
-      row.names(tmp)  <- as.numeric(row.names(hey)[nrow(hey)])+1
-      hey[(nrow(hey)+1) , 1: (ncol(hey)-2) ]  <- tmp
-      
-      hey$ID[(nrow(hey))] <- i
-      hey$ID_rand[(nrow(hey))] <- j
-    }
-  }
-  hey<-hey[-c(1),]
-  Category <- vector(mode='numeric', length=271)
-  hey <- data.frame(hey, Category)
-  hey$Category<-factor(hey$Category,labels = "Available")
-  
-  # 
-  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data") 
-  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
-  # 
-  e <- read.csv(file="extracted_values_NatEst.csv",header=TRUE) # Load extracted from natal and established to
-                                                          #to obtain ids for available in order
-  
-  library(splitstackshape)
+## ---- 5. SORT EXTRACTED AND MERGE AVAILABLE AND OBSERVED TERRITORIES ---- 
+availables <- list()
+for ( i in 1:length(u)){
+  availables[[i]] <- as.data.frame(do.call(rbind, u[[i]]))
+  availables[[i]]$ID_rand <- c(1:nrow(availables[[i]]))
+  availables[[i]]$ID <- i
+}
+hey <- do.call(rbind, availables)
+hey$Category <- "Available"
+## ---- 5.1  MERGE AVAILABLE AND OBSERVED TERRITORIES ---- 
+# PREPARE THE OBSERVED TERRITORIES 
   id <- e[e$Category == "Natal", c(33:38)] # Get IDs in data frame with available territories
-  id<-expandRows(id,11,count.is.col = FALSE) # 11 values of the same id to join to available (hey)
-  hey$ID_individual<-id$ID_individual
-  hey$Year<-id$Year
-  hey$Sex<-id$Sex
-  
-  ext<-bind_rows(hey,e) # Join to natal/established
-  ext<-arrange(ext,ID, Category)
-  
+  id <- expandRows(id, 11, count.is.col = FALSE) # 11 values of the same id to join to available (hey)
+# ADD INDIVIDUAL INFORMATION TO AVAILABLE TERRITORIES 
+  hey$ID_individual <- id$ID_individual
+  hey$Year <- id$Year
+  hey$Sex <- id$Sex
+  hey$Category <- as.character(hey$Category)
+# MERGE NATAL AND ESTABLISHED
+  ext <- bind_rows(hey, e) # Join to natal/established
+  ext <- arrange(ext, ID, Category)
   ext <- ext[ ,c(32:37,30,31,1:29)]
 
-  
-  moose<-ext[ ,c(9:22)] #Make a column with all moose densities by year
-  length((moose))
-  
+## ---- 5.2  GET THE MOOSE DENSITY IN ONE COLUMN ----
+  moose <- ext[ ,c(9:22)] #Make a column with all moose densities by year
+
   ext$moose_dens<-0
-  
   YEAR <- c(1998:2011)
   
   for (i in 1:3523){
-    
     ext$moose_dens[i]<- moose[i, which(YEAR==ext$Year[i])]
   }
   
-  ext<-ext[,-c(9:22)]
-  str(ext)
+  # REMOVE THE USELESS MOOSE DENSITY COLUMNS
+  ext <- ext[,-c(9:22)]
   
-  # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Publication/Datos") #Join to wolf density variable
-  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
-  # 
-  w<-read.csv("Data_NHBD_id_wolf_density.csv")
-  w <- w[,c(4,6,10,11,28)]
-  
-  e <- left_join(ext,w)
+## ---- 5.3  DEAL WITH THE WOLF DENSITY ----
+  w <- w[ ,c(4,6,10,11,28)]
+  e <- left_join(ext, w)
   e <- as.data.frame(e)
   e$moose_dens <- unlist(e$moose_dens)
-  # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
-  # write.csv(e,file="all_extracted_buffer.csv")
-  # 
-  # --------------- 6.1. Distance metric and CLR -------------------------- #
-    
-  library(survival)
+ 
+save(e, file=paste("e",buffer.size[xxx] ,".RData", sep=""))   
+}
+
+
+## ---- 6. EUCLIDEAN DISTANCE METRIC BETWEEN TERRITORIES ---- 
+for(xxx in 1:length(buffer.size)){
+  load(paste("e",buffer.size[xxx] ,".RData", sep=""))
   
-  # Euclidean distance metric between territories #
-  
-  e1 <- as.data.frame(e[,c("Year","human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
+e1 <- as.data.frame(e[,c("Year","human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
                            "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
                            "roughness_1", "roadbuild_1", "moose_dens")])
   
-  row.names(e1) <- e$X
-  d <- dist(e1,method = "euclidean")
-  class(d)
-  d1 <- as.matrix(d)
-  d1[1:10,1:10]
-  
-  
-  ID <- unique(e$ID_individual)
-  e$distance <- 0
-  for(i in 1:length(ID)){
+row.names(e1) <- e$X
+d <- dist(e1,method = "euclidean")
+d1 <- as.matrix(d)
+
+# ASSIGN DISTANCE TO EACH INDIVIDUAL   
+ID <- unique(e$ID_individual)
+e$distance <- 0
+for(i in 1:length(ID)){
     IDD <- which(e$ID_individual==ID[i])
-    
     e$distance[IDD]  <- c(d1[IDD[13], IDD[1:13]])
-    
-  }
-  
-  # CLR #
-  
+}
+
+# PREPAPRE THE DATA SET FOR CONDITIONNAL LOGISTIC REGRESSION  
   e$Category <- as.character(e$Category)
-  
   cd <- e[e$Category!="Natal",]
   
   cd$Category[cd$Category == "Established"] <- 1
   cd$Category[cd$Category == "Available"] <- 0
   cd$Category <-as.numeric(cd$Category)
+  c <- clogit(Category ~ distance  + strata(ID_individual), cd)
   
+  c1 <- summary(c)
+ print(c1$coefficients)
+}  
+  
+  ####
+  confint(c,level = 0.95)
   
   c <- clogit(Category ~ distance  + distance * Sex + distance * wolf_density + strata(ID_individual), cd)
   summary(c)
