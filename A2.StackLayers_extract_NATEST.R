@@ -151,6 +151,8 @@ stack<-stack(moose1998,moose1999,moose2000,moose2001,moose2002,moose2003,moose20
              human,humanlands,agri,forest,mires,water,mountains,roadsec,mainroad,bear,
              dem,slope,roughness,roadbuild,build,RAT=TRUE)
 save(stack,file = "stack.RData")
+writeRaster(stack, filename="stack.tif", options="INTERLEAVE=BAND", overwrite=TRUE)
+
 
 #Extract values of the coordinates buffered (NATAL AND ESTABLISHED)
 setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
