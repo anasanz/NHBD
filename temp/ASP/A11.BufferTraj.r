@@ -89,7 +89,7 @@ for(i in 1:length(ID)){
   plot(spl[ID[i]], add = TRUE, col=col[i])
 }
 
-## ---3. CREATE BUFFERS ----
+## ---3. CHECK DISTANCES
 
 # Distance: Points trajectory -> Straight line
 
