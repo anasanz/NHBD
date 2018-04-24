@@ -274,8 +274,16 @@ plot(nhbd~buffer.size, pch=16, ylab= "NHBD coeff")
 abline(h=0, lty=2)
 setwd("C:/My_documents/ana/nhbd/NHBD/Data")
 
-load("buf_dist.RData")
-abline(v=unlist(md), col="red", lty=2)
+load("buf_dist_good.RData")
+md1 <- as.numeric(unlist(lapply(md, function(x) x[[1]])))
+col <- unlist(lapply(md, function(x) x[[2]]))
+col[col=="short"] <- "blue"
+col[col=="Short"] <- "blue"
+col[col=="Medium"] <- "red"
+col[col=="Medium and Long"] <- "black"
+abline(v=unlist(md1), col=col, lty=2)
+legend("topright", fill=c("blue","red", "black"), legend=c("Short","Medium","Black"))
+
 
 ####
 confint(c,level = 0.95)
