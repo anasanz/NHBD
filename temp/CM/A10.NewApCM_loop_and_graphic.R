@@ -24,7 +24,7 @@ library(splitstackshape)
 # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
 setwd("~/Documents/NHBD/Data")
 
-buffer.size <- seq(25000, 250000, by=10000)
+buffer.size <- seq(25000, 300000, by=5000)
 for(xxx in 1:length(buffer.size)){
   ## ==== I. LOAD NECESSARY DATA ====
   
@@ -267,6 +267,7 @@ for(xxx in 1:length(buffer.size)){
   
   c1 <- summary(c)
   nhbd[xxx]<- (c1$coefficients)[1]
+  print(xxx)
 }  
 
 
