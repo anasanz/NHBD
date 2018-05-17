@@ -8,6 +8,26 @@ setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
 e<-read.csv("Data_NHBD_id_wolf_density.csv")
 e<-e[,-c(1,2)]
 
+#Add dispersal distances
+setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
+disper <- read.delim("C:/Users/Ana/Desktop/MASTER THESIS/Data/dispersal_p.txt")
+disperB<-disper[ ,c("X_birth","Y_birth")]
+disperE<-disper[ ,c("X_Established","Y_Established")]
+x1<-as.matrix(disperB)
+x2<-as.matrix(disperE)
+
+euc.dist <- function(x1, x2) sqrt(sum((x1 - x2) ^ 2))
+dist <- NULL
+for(i in 1:nrow(x1)) dist[i] <- euc.dist(x1[i,],x2[i,])
+dist #Vector with distances between points
+d<-as.data.frame(dist)
+disper$dist <- d$dist
+colnames(disper)[2] <- "ID_individual"
+disper <- disper[ ,c("ID_individual","dist")]
+
+library(dplyr)
+e <- left_join(e,disper)
+
 
 #CLUSTER 1
 cluster.1<-e[e$Clusters == 1, ]
@@ -27,7 +47,7 @@ b1$Category<-as.numeric(b1$Category)
 #Cluster as factor
 b1$Clusters <- as.factor(b1$Clusters)
 #Select variables
-b1<-b1[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters")]
+b1<-b1[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters","dist")]
 #Create E
 b1$E<-b1$Category
 b1$E <- 0
@@ -52,7 +72,7 @@ b2$Category<-as.numeric(b2$Category)
 #Cluster as factor
 b2$Clusters <- as.factor(b2$Clusters)
 #Select variables
-b2<-b2[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters")]
+b2<-b2[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters","dist")]
 #Create E
 b2$E<-b2$Category
 b2$E <- 0
@@ -79,7 +99,7 @@ b3$Category<-as.numeric(b3$Category)
 #Cluster as factor
 b3$Clusters <- as.factor(b3$Clusters)
 #Select variables
-b3<-b3[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters")]
+b3<-b3[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters","dist")]
 #Create E
 b3$E<-b3$Category
 b3$E <- 0
@@ -105,7 +125,7 @@ b4$Category<-as.numeric(b4$Category)
 #Cluster as factor
 b4$Clusters <- as.factor(b4$Clusters)
 #Select variables
-b4<-b4[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters")]
+b4<-b4[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters","dist")]
 #Create E
 b4$E<-b4$Category
 b4$E <- 0
@@ -131,7 +151,7 @@ b5$Category<-as.numeric(b5$Category)
 #Cluster as factor
 b5$Clusters <- as.factor(b5$Clusters)
 #Select variables
-b5<-b5[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters")]
+b5<-b5[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters","dist")]
 #Create E
 b5$E<-b5$Category
 b5$E <- 0
@@ -158,7 +178,7 @@ b6$Category<-as.numeric(b6$Category)
 #Cluster as factor
 b6$Clusters <- as.factor(b6$Clusters)
 #Select variables
-b6<-b6[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters")]
+b6<-b6[ , c("ID_individual","Sex", "Category", "wolf_density", "Clusters","dist")]
 #Create E
 b6$E<-b6$Category
 b6$E <- 0
@@ -173,11 +193,44 @@ c <- clogit(Category ~ Clusters   + wolf_density * E  + Sex * E + strata(ID_indi
 summary(c)
 confint(c,level = 0.95)
 
+
+#Including interaction distance*NHBD
+
+c <- clogit(Category ~ Clusters   + wolf_density * E  + Sex * E + dist * E + strata(ID_individual), clr)
+summary(c)
+confint(c,level = 0.95)
+
+#Subset dispersal distances (no interaction term)
+
+short <- subset(clr,dist <= 40000)
+mean(short$E)
+c <- clogit(Category ~ Clusters   + wolf_density * E  + Sex * E + strata(ID_individual), short)
+summary(c)
+confint(c,level = 0.95)
+
+medium <- subset(clr,40000 < dist & dist <= 200000)
+mean(medium$E)
+c <- clogit(Category ~ Clusters   + wolf_density * E  + Sex * E + strata(ID_individual), medium)
+summary(c)
+confint(c,level = 0.95)
+
+long <- subset(clr,dist > 200000)
+mean(long$E)
+c <- clogit(Category ~ Clusters   + wolf_density * E  + Sex * E + strata(ID_individual), long)
+summary(c)
+confint(c,level = 0.95)
+
+medlong <- subset(clr,dist > 40000)
+c <- clogit(Category ~ Clusters   + wolf_density * E  + Sex * E + strata(ID_individual), medlong)
+summary(c)
+confint(c,level = 0.95)
+
 ########################
 df <- list(E= c(0,1)
            ,Clusters=as.factor(1)
            , Sex=c("M","F")
-           , wolf_density= mean(e$wolf_density))
+           , wolf_density= mean(e$wolf_density)
+           , dist = mean(e$dist))
 new.df <- expand.grid(df)
 new.df$pred <- predict(c,newdata=new.df, type="risk", reference=c("sample") )
 
