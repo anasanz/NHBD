@@ -38,7 +38,7 @@ e <- left_join(e,disper)
 
 #Save file with dispersal distances
 setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
-write.csv(e,"Data_NHBD_id_wolf_density_distances.csv")
+write.csv(e,"Data_NHBD_id_wolf_density_distances.csv") # Short (<40000), Medium (<200000), Long (>200000)
 
 
 # Different cluster divisions
