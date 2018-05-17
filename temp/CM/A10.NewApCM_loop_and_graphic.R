@@ -23,9 +23,9 @@ library(splitstackshape)
 # setwd("C:/Users/ana.sanz/Documents/MASTER THESIS/Data")
 # setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
 setwd("~/Documents/NHBD/Data")
-
+setwd("C:/My_documents/ana/nhbd/NHBD/Data")
 buffer.size <- seq(25000, 300000, by=5000)
-for(xxx in 1:length(buffer.size)){
+for(xxx in 2:length(buffer.size)){
   ## ==== I. LOAD NECESSARY DATA ====
   
   # THE STUDY AREA 
@@ -151,13 +151,12 @@ for(xxx in 1:length(buffer.size)){
   
   # START THE CLUSTER AND SEND DATA AND LIBRARIES 
   cl <- makeCluster(N.CORES, "SOCK")
-  clusterExport(cl, c("stack","g", "j"), envir = environment(NULL))  
   clusterEvalQ(cl, library(raster))
   
   # START THE LOOP 
   u <- list()
   for(j in 1:271){
-    o <- list()
+      o <- list()
     # for (i in 1:11){
     #   time <-proc.time()
     #   a_v <- extract(stack, g[[j]][[i]], method='simple', buffer=17841,
@@ -179,6 +178,8 @@ for(xxx in 1:length(buffer.size)){
     #   
     #   o[[i]] <- a_v
     # }
+    clusterExport(cl, c("stack","g", "j"), envir = environment(NULL))  
+    
     o <- clusterApply(cl, 1:11, extract.wrapper)
     
     print(j)
@@ -194,8 +195,16 @@ for(xxx in 1:length(buffer.size)){
     availables[[i]] <- as.data.frame(do.call(rbind, u[[i]]))
     availables[[i]]$ID_rand <- c(1:nrow(availables[[i]]))
     availables[[i]]$ID <- i
+    colnames(availables[[i]])[30:31] <- c("x","y")
+    
   }
+  
+  availables[[1]]$moose1998_dens
+  availables[[2]]$moose1998_dens
+  
   hey <- do.call(rbind, availables)
+  
+  
   hey$Category <- "Available"
   ## ---- 5.1  MERGE AVAILABLE AND OBSERVED TERRITORIES ---- 
   # PREPARE THE OBSERVED TERRITORIES 
@@ -230,7 +239,7 @@ for(xxx in 1:length(buffer.size)){
   e <- as.data.frame(e)
   e$moose_dens <- unlist(e$moose_dens)
   
-  save(e, file=paste("e",buffer.size[xxx] ,".RData", sep=""))   
+  save(e, file=paste("C:/My_documents/ana/nhbd/NHBD/Data/NHBD_BUFFER/","e",buffer.size[xxx] ,".RData", sep=""))   
 }
 
 

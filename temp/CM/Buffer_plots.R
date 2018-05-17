@@ -93,7 +93,7 @@ xxx=1
 for(xxx in 1:length(buffer.size)){
 ## ====  2. LOAD e OBJECT WITH AVAIALBLE POINTS DRAWN FROM BUFFER SIZE ====
   load(paste("e",buffer.size[xxx] ,".RData", sep=""))
-  
+  colnames(e)[7:8] <-  c("coords.x1","coords.x2")
 ## ====  3. UPDATE THE DISPERSAL DISTANCES AND X Y FOR NATAL AND ESTABLISHED TERRITORY ====
   e$disp_distance <- 0
   ID <- unique(distances$ID_individual)
@@ -232,6 +232,50 @@ for(xxx in 1:length(buffer.size)){
     print(xxx)
 }  
 
+par(mfrow=c(1,3))
+plot(nhbd_short_M~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT")
+points(nhbd_short_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_short_M, y0= nhbd_short_F)
+
+abline(h=0)
+plot(nhbd_medium_M~buffer.size, pch=16, ylab= "NHBD coeff",main="MEDIUM")
+points(nhbd_medium_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+abline(h=0)
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_medium_M, y0= nhbd_medium_F)
+
+
+plot(nhbd_long_M~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG")
+points(nhbd_long_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+abline(h=0)
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_long_F, y0= nhbd_long_M)
+
+
+
+## check 
+ setwd("C:/My_documents/ana/nhbd/NHBD/Data")
+
+COUNTRIES <- readOGR("countries.removed.islands.shp")       ## Detailed Map of Scandinavia (including Finland & parts of Russia)
+COUNTRIES <- COUNTRIES[which(COUNTRIES$ISO %in% c("NOR","SWE")),]              ## Just take Sweden and Norway 
+
+short <- subset(e, disp_distance <= 40000)
+medium <- subset(e, 40000 < disp_distance & disp_distance <= 200000)
+long <- subset(e, disp_distance > 200000)
+
+
+tmp <- long[long$ID_individual == unique(long$ID_individual)[10],]
+plot(COUNTRIES,ylim=c(6500000, 7000000) )
+axis(2)
+points(tmp$coords.x2 ~ tmp$coords.x1, col=as.factor(tmp$Category),pch=16)
+
+tmp <- medium[medium$ID_individual == unique(medium$ID_individual)[10],]
+plot(COUNTRIES,ylim=c(6500000, 7000000) )
+axis(2)
+points(tmp$coords.x2 ~ tmp$coords.x1, col=as.factor(tmp$Category),pch=16)
+
+tmp <- short[short$ID_individual == unique(short$ID_individual)[10],]
+plot(COUNTRIES,ylim=c(6500000, 7000000))
+axis(2)
+points(tmp$coords.x2 ~ tmp$coords.x1, col=as.factor(tmp$Category),pch=16)
 
 
 
