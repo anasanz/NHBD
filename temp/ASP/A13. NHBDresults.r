@@ -35,7 +35,12 @@ disper <- disper[ ,c("ID_individual","dist")]
   
 library(dplyr)
 e <- left_join(e,disper)
-  
+
+#Save file with dispersal distances
+setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+write.csv(e,"Data_NHBD_id_wolf_density_distances.csv")
+
+
 # Different cluster divisions
 setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Multivariate")
 clu <- read.csv("ManyClusters")
@@ -10080,7 +10085,7 @@ c[c=="yellow"] <- "orange"
 # rescale dist
 
 plot(-30,ylim = c(-10,22), xlim=c(0,34),
-     pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "NHBD", xlab = " ", axes = FALSE)
+     pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "NHBD", xlab = " ", axes = FALSE, main = "Males")
 axis(1,lwd.tick=0, labels = FALSE)
 axis(1,at=c(11,22),labels=c("",""))
 
@@ -10103,22 +10108,40 @@ legend(x=29,y=20, legend = unique(r$Method)[6:10], col = c[r$Method][6:10],
 
 # Females
 
+setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
 r <- read.csv("Results_NHBD.csv", sep = ";")
 r <- r[c(31:60),c(2:6)]
 
+#rescale dist 
+r[r$Method=="Dist" ,3:5] <- r[r$Method=="Dist",3:5] *100*-1
+r[r$Trajectory=="Long" & r$Method=="8C",3:5] <- NA
+r[r$Trajectory=="Long" & r$Method=="9C",3:5] <- NA
+
 r <- data.frame( rbind(head(r, 10), NA, tail(r, -10)), row.names = NULL)
 r <- data.frame( rbind(head(r, 21), NA, tail(r, -21)), row.names = NULL)
-r <- data.frame( rbind(head(r, 34), NA, tail(r, -34)), row.names = NULL)
 
 x <- seq_along(r$NHBD)
 
 cc <- palette()
 c <- palette(c(cc,"purple","brown"))
+c[c=="yellow"] <- "orange"
+# rescale dist
 
-p <- plot(r$NHBD,ylim = c(-10,10), pch = 16, col = c[r$Method], ylab = "NHBD")
-arrows(x,r$X2.50.,x, r$X97.50., code=3, angle=90, length=0.05)
+plot(-30,ylim = c(-7,15), xlim=c(0,34),
+     pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "NHBD", xlab = " ", axes = FALSE, main = "Females")
+axis(1,lwd.tick=0, labels = FALSE)
+axis(1,at=c(11,22),labels=c("",""))
+
+axis(1,at=c(6,16,29),labels=c("Short","Medium","Long"),tick = 0)
+
+axis(2)
+arrows(x,r$X2.50.,x, r$X97.50., code=3, angle=90, length=0.04,col=c[r$Method])
+points(r$NHBD,
+       pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5))
+
 abline(h=0, lty=2)
 
-legend(x ="topright", legend = unique(r$Method), col = c[r$Method][1:10], pch = 16, cex = .65 )
-
-
+legend(x=23,y=15, legend = unique(r$Method)[1:5], col = c[r$Method][1:5],
+       pch = 18, cex = 0.85,bty="o",bg=grey(0.9),box.col=grey(0.9) )
+legend(x=29,y=15, legend = unique(r$Method)[6:10], col = c[r$Method][6:10],
+       pch = 18, cex = 0.85,bty="o",bg=grey(0.9),box.col=grey(0.9)  )
