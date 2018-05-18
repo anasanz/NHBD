@@ -88,10 +88,9 @@ pack$Y <- as.numeric(pack$Y)
 setwd("C:/My_documents/ana/nhbd/NHBD/Data/NHBD_BUFFER")
 buffer.size <- seq(25000, 300000, by=5000)
 nhbd_short_M<- nhbd_short_F<- nhbd_medium_M<- nhbd_medium_F<- nhbd_long_M<- nhbd_long_F<- 0
-
 xxx=1
 #for(xxx in 1:length(buffer.size)){
-  for(xxx in 1:10){
+  for(xxx in 1:20){
     
 ## ====  2. LOAD e OBJECT WITH AVAIALBLE POINTS DRAWN FROM BUFFER SIZE ====
   load(paste("e",buffer.size[xxx] ,".RData", sep=""))
@@ -205,21 +204,40 @@ xxx=1
   c_medium_M
   c_medium_F
   
-  # c_short <- clogit(Category ~ distance  + wolf_density1 * distance  				
-  #             + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1				
-  #             + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1 				
-  #             + slope_1 + roughness_1 + roadbuild_1 + moose_dens 				
-  #             + strata(ID_individual), short_F)	
-  # c_medium <- clogit(Category ~ distance  + wolf_density1 * distance  				
-  #             + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1				
-  #             + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1 				
-  #             + slope_1 + roughness_1 + roadbuild_1 + moose_dens 				
-  #             + strata(ID_individual), medium)	
-  # c_long <- clogit(Category ~ distance  + wolf_density1 * distance  				
-  #             + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1				
-  #             + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1 				
-  #             + slope_1 + roughness_1 + roadbuild_1 + moose_dens 				
-  #             + strata(ID_individual), long)	
+  # c_short_F <- summary(clogit(Category ~ distance  + wolf_density1 * distance
+  #             + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1
+  #             + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1
+  #             + slope_1 + roughness_1 + roadbuild_1 + moose_dens
+  #             + strata(ID_individual), short_F))
+  # c_short_M <- summary(clogit(Category ~ distance  + wolf_density1 * distance
+  #                   + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1
+  #                   + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1
+  #                   + slope_1 + roughness_1 + roadbuild_1 + moose_dens
+  #                   + strata(ID_individual), short_M))
+  # 
+  # c_medium_M <- summary(clogit(Category ~ distance  + wolf_density1 * distance
+  #                      + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1
+  #                      + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1
+  #                      + slope_1 + roughness_1 + roadbuild_1 + moose_dens
+  #                      + strata(ID_individual), medium_M))
+  # c_medium_F <- summary(clogit(Category ~ distance  + wolf_density1 * distance
+  #             + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1
+  #             + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1
+  #             + slope_1 + roughness_1 + roadbuild_1 + moose_dens
+  #             + strata(ID_individual), medium_F))
+  # 
+  # 
+  # c_long_F <- summary(clogit(Category ~ distance  + wolf_density1 * distance
+  #             + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1
+  #             + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1
+  #             + slope_1 + roughness_1 + roadbuild_1 + moose_dens
+  #             + strata(ID_individual), long_F))
+  # c_long_M <- summary(clogit(Category ~ distance  + wolf_density1 * distance
+  #             + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1
+  #             + mountains_1 + roadens_sec1 + mainroad_1 + bear_1 + dem_1
+  #             + slope_1 + roughness_1 + roadbuild_1 + moose_dens
+  #             + strata(ID_individual), long_M))
+  
   
   nhbd_short_M[xxx]<- (c_short_M$coefficients)[1]
   nhbd_short_F[xxx]<- (c_short_F$coefficients)[1]
@@ -236,14 +254,14 @@ xxx=1
 
 
 
-buffer.size <- buffer.size[1:10]
+buffer.size <- buffer.size[1:20]
 par(mfrow=c(1,3))
 plot(nhbd_short_M~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT", ylim=c( -0.03,0))
 points(nhbd_short_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_short_M, y0= nhbd_short_F)
 
 abline(h=0)
-plot(nhbd_medium_M~buffer.size, pch=16, ylab= "NHBD coeff",main="MEDIUM", ylim=c( -0.003,0.008))
+plot(nhbd_medium_M~buffer.size, pch=16, ylab= "NHBD coeff",main="MEDIUM", ylim=c( -0.006,0.008))
 points(nhbd_medium_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 abline(h=0)
 segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_medium_M, y0= nhbd_medium_F)
