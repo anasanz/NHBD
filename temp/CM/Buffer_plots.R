@@ -90,7 +90,7 @@ buffer.size <- seq(25000, 300000, by=5000)
 nhbd_short_M<- nhbd_short_F<- nhbd_medium_M<- nhbd_medium_F<- nhbd_long_M<- nhbd_long_F<- 0
 xxx=1
 #for(xxx in 1:length(buffer.size)){
-  for(xxx in 1:20){
+  for(xxx in 1:26){
     
 ## ====  2. LOAD e OBJECT WITH AVAIALBLE POINTS DRAWN FROM BUFFER SIZE ====
   load(paste("e",buffer.size[xxx] ,".RData", sep=""))
@@ -254,7 +254,7 @@ xxx=1
 
 
 
-buffer.size <- buffer.size[1:20]
+buffer.size <- buffer.size[1:26]
 par(mfrow=c(1,3))
 plot(nhbd_short_M~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT", ylim=c( -0.03,0))
 points(nhbd_short_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
