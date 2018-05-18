@@ -90,7 +90,9 @@ buffer.size <- seq(25000, 300000, by=5000)
 nhbd_short_M<- nhbd_short_F<- nhbd_medium_M<- nhbd_medium_F<- nhbd_long_M<- nhbd_long_F<- 0
 
 xxx=1
-for(xxx in 1:length(buffer.size)){
+#for(xxx in 1:length(buffer.size)){
+  for(xxx in 1:10){
+    
 ## ====  2. LOAD e OBJECT WITH AVAIALBLE POINTS DRAWN FROM BUFFER SIZE ====
   load(paste("e",buffer.size[xxx] ,".RData", sep=""))
   colnames(e)[7:8] <-  c("coords.x1","coords.x2")
@@ -232,19 +234,22 @@ for(xxx in 1:length(buffer.size)){
     print(xxx)
 }  
 
+
+
+buffer.size <- buffer.size[1:10]
 par(mfrow=c(1,3))
-plot(nhbd_short_M~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT")
+plot(nhbd_short_M~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT", ylim=c( -0.03,0))
 points(nhbd_short_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_short_M, y0= nhbd_short_F)
 
 abline(h=0)
-plot(nhbd_medium_M~buffer.size, pch=16, ylab= "NHBD coeff",main="MEDIUM")
+plot(nhbd_medium_M~buffer.size, pch=16, ylab= "NHBD coeff",main="MEDIUM", ylim=c( -0.003,0.008))
 points(nhbd_medium_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 abline(h=0)
 segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_medium_M, y0= nhbd_medium_F)
 
 
-plot(nhbd_long_M~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG")
+plot(nhbd_long_M~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG", ylim=c( -0.001,0.009))
 points(nhbd_long_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 abline(h=0)
 segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_long_F, y0= nhbd_long_M)
