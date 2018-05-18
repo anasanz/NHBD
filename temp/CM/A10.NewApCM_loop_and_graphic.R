@@ -140,7 +140,7 @@ for(xxx in 2:length(buffer.size)){
   ## ---- 4. EXTRACT HABITAT CHARACTERISTICS  ----
   ## PARRALLEL THE LOOP 
   # DEFINE NUMBER OF CORES 
-  N.CORES = 6 
+  N.CORES = 3 
   # MAKE WRAPPER FUNCTION FOR THE CLUSTER APPLY
   extract.wrapper <- function(x){
     a_v <- raster::extract(stack, g[[j]][[x]], method='simple', buffer=17841,
