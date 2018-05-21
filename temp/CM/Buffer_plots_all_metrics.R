@@ -88,6 +88,12 @@ pack$Y <- as.numeric(pack$Y)
 setwd("C:/My_documents/ana/nhbd/NHBD/Data/NHBD_BUFFER")
 buffer.size <- seq(25000, 300000, by=5000)
 nhbd_short_M<- nhbd_short_F<- nhbd_medium_M<- nhbd_medium_F<- nhbd_long_M<- nhbd_long_F<- 0
+nhbd_short_M_Kmeans <- nhbd_short_F_Kmeans <- nhbd_medium_M_Kmeans <- list()
+nhbd_medium_F_Kmeans <- nhbd_long_M_Kmeans <- nhbd_long_F_Kmeans <- list()
+for(i in 1:8){
+nhbd_short_M_Kmeans[[i]] <- nhbd_short_F_Kmeans[[i]] <- nhbd_medium_M_Kmeans[[i]] <- 0
+nhbd_medium_F_Kmeans[[i]] <- nhbd_long_M_Kmeans[[i]] <- nhbd_long_F_Kmeans[[i]] <- 0
+}
 xxx=1
 for(xxx in 1:length(buffer.size)){
 
@@ -196,12 +202,6 @@ for(xxx in 1:length(buffer.size)){
   c_long_F <- summary(clogit(Category ~ distance  				
                      + strata(ID_individual), long_F))
   
-  c_long_F
-  c_long_M
-  c_short_F
-  c_short_M
-  c_medium_M
-  c_medium_F
   
   # c_short_F <- summary(clogit(Category ~ distance  + wolf_density1 * distance
   #             + human_1 + humanlands_1 + agri_1 + forest_1 + mires_1 + water_1
@@ -248,6 +248,103 @@ for(xxx in 1:length(buffer.size)){
   nhbd_long_F[xxx]<- (c_long_F$coefficients)[1]
   
   
+  #### clustering 
+  if(sum(is.na(e$roadbuild_1))>0){
+  e1 <- e[- which(is.na(e$roadbuild_1)),]
+  }else{
+    e1 <- e
+  }
+  sd_e <- as.data.frame(scale(e1[,c("human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
+                               "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
+                              "roughness_1", "roadbuild_1", "moose_dens","wolf_density1")]))
+  
+  sd_e <- na.omit(sd_e)
+  pc <- prcomp(sd_e)
+  comp <- data.frame(pc$x[,1:5])
+  
+  #RUN THE CLUSTERS 
+  CLUSTERS <- c(3:10)
+  for(kk in 1:length(CLUSTERS)){
+  k <- kmeans(comp, CLUSTERS[kk], nstart=25, iter.max=1000)
+  sd_e$Clusters <- k$cluster
+  sd_e$ID_individual <- e1$ID_individual
+  sd_e$disp_distance <- e1$disp_distance
+  sd_e$Sex <- e1$Sex
+  
+  ### make the NHBD variable 
+  sd_e$Category <- as.character(e1$Category)
+  sd_e$NHBD <- 0
+  IDDD <- unique(sd_e$ID_individual)
+  for( ii in 1:length(IDDD)){
+    tmp <- sd_e[sd_e$ID_individual==IDDD[ii],]
+    sd_e[sd_e$ID_individual==IDDD[ii],]$NHBD <- as.numeric(tmp$Clusters == tmp[tmp$Category=="Natal",]$Clusters)
+  }
+  
+  
+  
+  sd_e1 <- sd_e[sd_e$Category!="Natal",]
+  
+  sd_e1$Category[sd_e1$Category == "Established"] <- 1
+  sd_e1$Category[sd_e1$Category == "Available"] <- 0
+  sd_e1$Category <- as.numeric(sd_e1$Category)
+  
+  sd_e1$Sex <- as.character(sd_e1$Sex)
+  short <- subset(sd_e1, disp_distance <= 40000)
+  short[,c("human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
+           "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
+           "roughness_1", "roadbuild_1", "moose_dens","wolf_density1")] <- scale(short[,c("human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
+                                                                                          "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
+                                                                                          "roughness_1", "roadbuild_1", "moose_dens","wolf_density1")])
+  
+  medium <- subset(sd_e1,40000 < disp_distance & disp_distance <= 200000)
+  medium[,c("human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
+            "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
+            "roughness_1", "roadbuild_1", "moose_dens","wolf_density1")] <- scale(medium[,c("human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
+                                                                                            "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
+                                                                                            "roughness_1", "roadbuild_1", "moose_dens","wolf_density1")])
+  
+  long <- subset(sd_e1, disp_distance > 200000)
+  long[,c("human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
+          "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
+          "roughness_1", "roadbuild_1", "moose_dens","wolf_density1")] <- scale(long[,c("human_1", "humanlands_1", "agri_1", "forest_1", "mires_1",
+                                                                                        "water_1", "mountains_1", "roadens_sec1", "mainroad_1","bear_1", "dem_1","slope_1",
+                                                                                        "roughness_1", "roadbuild_1", "moose_dens","wolf_density1")])
+  
+  long_M <- subset(long, Sex== "M")
+  long_F <- subset(long, Sex== "F")
+  short_M <- subset(short, Sex== "M")
+  short_F <- subset(short, Sex== "F")
+  medium_M <- subset(medium, Sex== "M")
+  medium_F <- subset(medium, Sex== "F")
+  
+  c_short_M <- summary(clogit(Category ~ NHBD  		
+                              + strata(ID_individual), short_M))
+  c_short_F <- summary(clogit(Category ~ NHBD  		
+                              + strata(ID_individual), short_F))	
+  
+  c_medium_M <- summary(clogit(Category ~ NHBD  	
+                               + strata(ID_individual), medium_M))	
+  c_medium_F <- summary(clogit(Category ~ NHBD  	
+                               + strata(ID_individual), medium_F))
+  
+  c_long_M <- summary(clogit(Category ~ NHBD  				
+                             + strata(ID_individual), long_M))
+  c_long_F <- summary(clogit(Category ~ NHBD  				
+                             + strata(ID_individual), long_F))
+  
+  
+  nhbd_short_M_Kmeans[[kk]][xxx]<- (c_short_M$coefficients)[1]
+  nhbd_short_F_Kmeans[[kk]][xxx]<- (c_short_F$coefficients)[1]
+  
+  nhbd_medium_M_Kmeans[[kk]][xxx]<- (c_medium_M$coefficients)[1]
+  nhbd_medium_F_Kmeans[[kk]][xxx]<- (c_medium_F$coefficients)[1]
+  
+  nhbd_long_M_Kmeans[[kk]][xxx]<- (c_long_M$coefficients)[1]
+  nhbd_long_F_Kmeans[[kk]][xxx]<- (c_long_F$coefficients)[1]
+  
+  
+  }
+  
     print(xxx)
 }  
 
@@ -269,6 +366,29 @@ plot(nhbd_long_M~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG", ylim=c( -0
 points(nhbd_long_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 abline(h=0)
 segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_long_F, y0= nhbd_long_M)
+
+######
+for(i in 1:8){
+par(mfrow=c(1,3))
+plot(nhbd_short_M_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT", ylim=c( -1,4))
+points(nhbd_short_F_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_short_M_Kmeans[[i]], y0= nhbd_short_F_Kmeans[[i]])
+abline(h=0)
+
+plot(nhbd_medium_M_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",main="MEDIUM", ylim=c( -1.5,2.5))
+points(nhbd_medium_F_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+abline(h=0)
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_medium_M_Kmeans[[i]], y0= nhbd_medium_F_Kmeans[[i]])
+
+
+plot(nhbd_long_M_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG", ylim=c( -3.5,1.5))
+points(nhbd_long_F_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+abline(h=0)
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_long_F_Kmeans[[i]], y0= nhbd_long_M_Kmeans[[i]])
+}
+
+
+
 
 
 
@@ -319,6 +439,6 @@ legend("topright", fill=c("blue","red", "black"), legend=c("Short","Medium","Bla
 ####
 confint(c,level = 0.95)
 
-c <- clogit(Category ~ distance  + distance * Sex + distance * wolf_density + strata(ID_individual), cd)
+c <- clogit(Category ~ distance  + distance * Sex + distance * wolf_density + strata(ID_individual), sd_e1)
 summary(c)
 confint(c,level = 0.95)
