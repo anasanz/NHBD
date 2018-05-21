@@ -349,23 +349,23 @@ for(xxx in 1:length(buffer.size)){
 }  
 
 
-pdf(paste("buffer_Distance",CLUSTERS[i],".pdf",sep=""))
+pdf(paste("buffer_Distance",".pdf",sep=""))
 par(mfrow=c(1,3))
-plot(nhbd_short_M~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT", ylim=c( -0.04,0))
-points(nhbd_short_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
-segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_short_M, y0= nhbd_short_F)
+plot(nhbd_short_M*-1~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT", ylim=c( -0,0.04))
+points(nhbd_short_F*-1~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_short_M*-1, y0= nhbd_short_F*-1)
 
 abline(h=0)
-plot(nhbd_medium_M~buffer.size, pch=16, ylab= "NHBD coeff",main="MEDIUM", ylim=c( -0.010,0.008))
-points(nhbd_medium_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+plot(nhbd_medium_M*-1~buffer.size, pch=16, ylab= "NHBD coeff",main="MEDIUM", ylim=c( -0.0080,0.010))
+points(nhbd_medium_F*-1~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 abline(h=0)
-segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_medium_M, y0= nhbd_medium_F)
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_medium_M*-1, y0= nhbd_medium_F*-1)
 
 
-plot(nhbd_long_M~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG", ylim=c( -0.001,0.009))
-points(nhbd_long_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
+plot(nhbd_long_M*-1~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG", ylim=c( -0.009,0.001))
+points(nhbd_long_F*-1~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 abline(h=0)
-segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_long_F, y0= nhbd_long_M)
+segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_long_F*-1, y0= nhbd_long_M*-1)
 dev.off()
 
 
