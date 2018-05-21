@@ -89,9 +89,8 @@ setwd("C:/My_documents/ana/nhbd/NHBD/Data/NHBD_BUFFER")
 buffer.size <- seq(25000, 300000, by=5000)
 nhbd_short_M<- nhbd_short_F<- nhbd_medium_M<- nhbd_medium_F<- nhbd_long_M<- nhbd_long_F<- 0
 xxx=1
-#for(xxx in 1:length(buffer.size)){
-  for(xxx in 1:26){
-    
+for(xxx in 1:length(buffer.size)){
+
 ## ====  2. LOAD e OBJECT WITH AVAIALBLE POINTS DRAWN FROM BUFFER SIZE ====
   load(paste("e",buffer.size[xxx] ,".RData", sep=""))
   colnames(e)[7:8] <-  c("coords.x1","coords.x2")
