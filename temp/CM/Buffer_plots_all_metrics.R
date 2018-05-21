@@ -349,7 +349,7 @@ for(xxx in 1:length(buffer.size)){
 }  
 
 
-
+pdf(paste("buffer_Distance",CLUSTERS[i],".pdf",sep=""))
 par(mfrow=c(1,3))
 plot(nhbd_short_M~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT", ylim=c( -0.04,0))
 points(nhbd_short_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
@@ -366,9 +366,13 @@ plot(nhbd_long_M~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG", ylim=c( -0
 points(nhbd_long_F~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 abline(h=0)
 segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_long_F, y0= nhbd_long_M)
+dev.off()
+
 
 ######
+setwd("C:/My_documents/ana/nhbd/NHBD/temp/CM")
 for(i in 1:8){
+pdf(paste("buffer_Kmeans",CLUSTERS[i],".pdf",sep=""))
 par(mfrow=c(1,3))
 plot(nhbd_short_M_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",main="SHORT", ylim=c( -1,4))
 points(nhbd_short_F_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
@@ -385,6 +389,7 @@ plot(nhbd_long_M_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",main="LONG"
 points(nhbd_long_F_Kmeans[[i]]~buffer.size, pch=16, ylab= "NHBD coeff",col="red")
 abline(h=0)
 segments(x0 = buffer.size,x1=buffer.size, y1=nhbd_long_F_Kmeans[[i]], y0= nhbd_long_M_Kmeans[[i]])
+dev.off()
 }
 
 
