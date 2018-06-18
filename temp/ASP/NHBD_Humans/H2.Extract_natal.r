@@ -26,4 +26,6 @@ natal_MID <- natal_MID[ ,which(colnames(natal_MID) %in% c("ID_M", "M_human_1", "
 
 values <- bind_cols(natal_FID,natal_MID)
 
+setwd("~/Norway/NHBD_humans")
+
 write.csv(values,file="natal_values.csv")

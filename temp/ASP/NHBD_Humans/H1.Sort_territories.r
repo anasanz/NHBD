@@ -7,6 +7,7 @@ library(dplyr)
 
 setwd("~/Norway/NHBD_humans")
 p <- read.csv("Pred_studies.csv", sep = ";")
+p <- p[ , c(1:7)]
 
   # 1. --- Track partner ----
 
@@ -26,7 +27,7 @@ for (i in 1:nrow(p)){
 colnames(p)[1] <- "ID_individual_GPS" # To know which individual of the pair was the GPS_collared
 colnames(p)[2] <- "Sex_GPS" 
 
-#Find ID mate: The ones missing are from 2012
+#Find ID mate: The ones missing are from 2012 and Glaskogen_2002
 m$ID_M <- as.character(m$ID_M)
 m$ID_F <- as.character(m$ID_F)
 
@@ -40,8 +41,9 @@ for (i in 1:nrow(p))
 
   # 2. ---- Get birth territory ----
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
-d <- read.delim("dispersal_p.txt")
+setwd("~/Norway/NHBD_humans")
+d <- read.csv("dispersal_human.csv",header = TRUE,sep = ";")
+d <- d[-which(duplicated(d)), ]
 
 # Join info males
 d_m <- d[which(d$MALES == "M"), c(1:9)]
@@ -54,12 +56,8 @@ d_f <- d[which(d$MALES == "F"), c(1:9)]
 colnames(d_f)[c(2:9)] <- c("ID_F","Birth_territory_F", "Y_birth_F",  "X_birth_F", "Established_territory_F", "Y_Established_F",
                          "X_Established_F", "Year.establishment_F")
 j <- left_join(j,d_f, by = "ID_F")
+
 j <- j[which(complete.cases(j[,c(11:25)])), ]
 write.csv(j,"data_pairs_human.csv")
 
 
-# Find missing IDs
-g <- read.csv("GPSdata180207.csv", sep = ";")
-aspa_2015 <- g[which(g$Marking_territory == "Aspafallet" ) & which(g$UTC_date ==), ]
-unique(aspa$Wolf_ID)
-unique(g$UTC_date)

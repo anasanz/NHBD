@@ -11,8 +11,6 @@ colnames(c)[1] <- "Territory_antonio"
 e <- left_join(v,c)
 
 
-
-
 # ---- Explore data ----
 
 # ---- FEMALES ----
@@ -55,10 +53,6 @@ abline(lm(e$agri5x5.estimate ~ e$F_agri_1))
 
 plot(e$F_forest_1,e$forest5x5.estimate, pch = 16)
 abline(lm(e$forest5x5.estimate ~ e$F_forest_1))
-
-
-
-
 
 # ---- MALES ----
 
