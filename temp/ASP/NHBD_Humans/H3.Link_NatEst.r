@@ -217,14 +217,31 @@ abline(lm(prov_m$main_roads.estimate ~ prov_m$PC))
 library(lme4)
 
 m2 <- lmer(main_roads.estimate ~ PC + forest_1 + bear_1 + Sex + 
-              Season + PC*Sex + (1|ID_pair), data = prov)
+              Season + PC*Sex + (1|ID_pair), data = prov) # With interaction
 summary(m2)
-confint(m2)
+confint(m2) #Slight overlap
 
 m3 <- lmer(main_roads.estimate ~ PC + forest_1 + bear_1 + Sex + 
-             Season + (1|ID_pair), data = prov)
+             Season + (1|ID_pair), data = prov) #Without interaction
 summary(m3)
-confint(m3) # 
+confint(m3) #Slight overlap
+
+AIC(m2,m3) # Better without
+
+m4 <- lmer(main_roads.estimate ~ PC + forest_1 + bear_1 + Sex
+           + (1|ID_pair), data = prov) # No season
+
+m5 <- lmer(main_roads.estimate ~ PC + forest_1 + bear_1 +
+             Season + (1|ID_pair), data = prov) # No sex
+summary(m5)
+confint(m5) #Slight overlap
+
+m6 <- lmer(main_roads.estimate ~ PC + forest_1 + bear_1
+           + (1|ID_pair), data = prov) #No season no sex
+
+AIC(m3, m4, m5, m6) # Better without
+summary(m6)
+confint(m6) # Overlap
 
 # By sex
 m_f2 <- lmer(main_roads.estimate ~ PC + forest_1 + bear_1 + 

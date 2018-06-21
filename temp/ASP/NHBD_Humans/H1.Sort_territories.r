@@ -58,6 +58,6 @@ colnames(d_f)[c(2:9)] <- c("ID_F","Birth_territory_F", "Y_birth_F",  "X_birth_F"
 j <- left_join(j,d_f, by = "ID_F")
 
 j <- j[which(complete.cases(j[,c(11:25)])), ]
-write.csv(j,"data_pairs_human.csv")
+write.csv(j,"data_pairs_human_complete.csv")
 
 
