@@ -116,7 +116,8 @@ writeRaster(tri5, "tri5", format = "GTiff") # Saved in folder Analysis
 
 setwd("~/Norway/NHBD_humans")
 d <- read.csv("all_points.csv", header = TRUE)
-
+data <- d[d$territory=="Fulufjallet_2010_w",]
+plot(data$x~data$y)
 #  C. ---- EXTRACT ----
 
 setwd("~/Norway/NHBD_humans/Antonio/GIS/Analysis")
@@ -137,7 +138,7 @@ main <- raster("main25m.tif")
 sec <- raster("2nd25m.tif")
 stack_roads <- stack(main, sec)
 
-coord <- d[ ,c("x","y")]
+coord <- d[ ,c("x_UTM","y_UTM")]
 
 cells <- cellFromXY(stack_veg, coord) # 1. Tells the number of the cells where the coord. fall
 cov_veg <- stack_veg[cells]           # 2. Retreats the value of those cells in the stack
