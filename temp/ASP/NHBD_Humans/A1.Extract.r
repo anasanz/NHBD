@@ -36,7 +36,7 @@ dev.off()
 setwd("C:/Users/Ana/Documents/Norway/NHBD_humans/Antonio/GIS/vegetation")
 veg <- raster('veg_25.tif') # 25 x 25
 
-#Make one layer for each class
+#Make one layer 1/0 for each class
 bveg<-layerize(veg,classes=NULL,bylayer=TRUE,suffix='numbers')
 
 humanlands<-raster(bveg,layer=1)
@@ -116,14 +116,14 @@ writeRaster(tri5, "tri5", format = "GTiff") # Saved in folder Analysis
 
 setwd("~/Norway/NHBD_humans")
 d <- read.csv("all_points.csv", header = TRUE)
-data <- d[d$territory=="Fulufjallet_2010_w",]
-plot(data$x~data$y)
+
 #  C. ---- EXTRACT ----
 
 setwd("~/Norway/NHBD_humans/Antonio/GIS/Analysis")
 
 humanlands <- raster("humland_pro.tif")
 agri <- raster("agri_pro.tif")
+plot(agri)
 forest <- raster("forest_pro.tif")
 mires <- raster("mires_pro.tif")
 water <- raster("water_pro.tif")
@@ -138,10 +138,10 @@ main <- raster("main25m.tif")
 sec <- raster("2nd25m.tif")
 stack_roads <- stack(main, sec)
 
-coord <- d[ ,c("x_UTM","y_UTM")]
+coord <- d[ ,c("x_UTM","y_UTM")] # Coordinates used and random
 
 cells <- cellFromXY(stack_veg, coord) # 1. Tells the number of the cells where the coord. fall
-cov_veg <- stack_veg[cells]           # 2. Retreats the value of those cells in the stack
+cov_veg <- stack_veg[cells]           # 2. Returns the value of those cells in the stack
 
 cells <- cellFromXY(stack_dem, coord) 
 cov_dem <- stack_dem[cells]  
@@ -149,7 +149,7 @@ cov_dem <- stack_dem[cells]
 cells <- cellFromXY(stack_roads, coord) 
 cov_roads <- stack_roads[cells] 
 
-df <- data.frame(d, cov_veg, cov_dem, cov_roads)
+df <- data.frame(d, cov_veg, cov_dem, cov_roads) # Join coordinates with extracted values
 
 df$Season <- 0 # Include season
 df$Season[grep("_s", df$territory, ignore.case = TRUE)] <- 1
@@ -158,6 +158,20 @@ df$Season[grep("_w", df$territory, ignore.case = TRUE)] <- 2
 setwd("~/Norway/NHBD_humans/Antonio")
 write.csv (df, "covariates_Antonio.csv")
 
+# Extract distance to buildings (I forgot!)
+
+build <- raster("dist_build25.tif")
+cells <- cellFromXY(build, coord) 
+cov_build <- build[cells] 
+
+setwd("~/Norway/NHBD_humans/Antonio")
+cov <- read.csv("covariates_Antonio.csv") # Load the rest already extracted
+cov <- cov[ ,-c(17)] #??? Remove season becaust its useless
+colnames(cov)[3] <- "territory" # Change name of territory column because its annoying
+all_cov <- data.frame(cov,cov_build)
+
+setwd("~/Norway/NHBD_humans/Antonio")
+write.csv (all_cov, "covariates_Antonio.csv")
 
 
 
