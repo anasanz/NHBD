@@ -29,3 +29,5 @@ values <- bind_cols(natal_FID,natal_MID)
 setwd("~/Norway/NHBD_humans")
 
 write.csv(values,file="natal_values.csv")
+
+
