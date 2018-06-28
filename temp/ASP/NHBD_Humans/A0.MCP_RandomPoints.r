@@ -1,8 +1,35 @@
-rm(list=ls())
-# MCP 100%
 
+rm(list=ls())
 library(adehabitatHR)
 library(sp)
+library(rgdal)
+
+# ---- 1. Check data with MCP 90 % ----
+
+setwd("~/Norway/NHBD_humans/Antonio")
+d <- read.csv("FINAL_dataset_v2_season+numeric.csv", header = TRUE, sep = ";")
+
+scand<- readOGR("C:/Users/Ana/Desktop/MASTER THESIS/Data/GIS", "Scandinavia_border_33N")
+
+ID <- unique(d$territory_)
+setwd("~/Norway/NHBD_humans/Antonio")
+
+pdf(file="MCP.pdf")
+for (i in 1:length(ID)){
+  fc <- d[which(d$territory_ == ID[i] & d$id != "random"), ]
+  fr <- d[which(d$territory_ == ID[i] & d$id == "random"), ]
+  plot(scand, axes=TRUE, border="black", xlim = c(min(fc$x_UTM),max(fc$x_UTM)), ylim = c(min(fc$y_UTM),max(fc$y_UTM)))
+  points(fc$x_UTM, fc$y_UTM, pch = 16, col = "red")
+  points(fr$x_UTM, fr$y_UTM, pch = 16, col = "blue")
+  
+  print(nrow(fc)/nrow(fr))
+}
+dev.off()
+
+# Predation studies cover short time span. With a 90 % MCP the area where availability is defined leaves out places 
+# within the home range where wolves could have also been.
+
+# ---- 2. MCP 100% ----
 
 setwd("~/Norway/NHBD_humans/Antonio")
 d <- read.csv("FINAL_dataset_v2_season+numeric.csv", header = TRUE, sep = ";")
@@ -17,7 +44,7 @@ plot(mcp_100,col = mcp_100$id)
 plot(mcp_100[1, ])
 
 
-# Random points
+# ---- 3. Create random points ----
 
 ID <- unique(c$territory_)
 tmp.df <- list()
@@ -39,20 +66,11 @@ tmp.df[[i]] <- data.frame( territory_=ID[i]
 
 df <- do.call(rbind, tmp.df)
 
-# MAL
-# for (i in 1:length(ID)){
-#   rp <- spsample(mcp_100@polygons[[i]], nrow(c[which(c$territory_ == ID[i]), ]), type="random", iter = 10)
-#   df[which(df$territory == ID[i]), ] <- data.frame(territory = ID[i], rp@coords)
-#   }
-# 
-# for (i in 1:length(ID)){
-#   plot(mcp_100[mcp_100$id==ID[i], ])
-#   points(df[which(df$territory == ID[i]),c(2,3)])
-# }
 df$used <- 0 # Used 0: Random
 
 
-##### JOIN CREATED RANDOM POINTS WITH USED
+# ---- 4. Join created random points with used GPS locations ----
+
 d <- read.csv("FINAL_dataset_v2_season+numeric.csv", header = TRUE, sep = ";")
 c <- d[which(d$id != "random"), which(colnames(d) %in% c("territory_", "x_UTM", "y_UTM")) ]
 c$Used <- 1 # Used 1: GPS points

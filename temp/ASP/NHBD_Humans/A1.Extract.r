@@ -2,36 +2,10 @@
 library(rgdal)
 library(raster)
 
-# ---- Check the data ANTONIO ----
+# Extract from 100% MCP
 
-setwd("~/Norway/NHBD_humans/Antonio")
-d <- read.csv("FINAL_dataset_v2_season+numeric.csv", header = TRUE, sep = ";")
-
-scand<- readOGR("C:/Users/Ana/Desktop/MASTER THESIS/Data/GIS", "Scandinavia_border_33N")
-
-ID <- unique(d$territory_)
-setwd("~/Norway/NHBD_humans/Antonio")
-
-pdf(file="MCP.pdf")
-for (i in 1:length(ID)){
-  fc <- d[which(d$territory_ == ID[i] & d$id != "random"), ]
-  fr <- d[which(d$territory_ == ID[i] & d$id == "random"), ]
-  plot(scand, axes=TRUE, border="black", xlim = c(min(fc$x_UTM),max(fc$x_UTM)), ylim = c(min(fc$y_UTM),max(fc$y_UTM)))
-  points(fc$x_UTM, fc$y_UTM, pch = 16, col = "red")
-  points(fr$x_UTM, fr$y_UTM, pch = 16, col = "blue")
-  
-  print(nrow(fc)/nrow(fr))
-}
-dev.off()
-
-# With a 95 % MCP the area where availability is defined is too small
-# Extract values from random points created in 100 % MCP (created file all_points.csv)
-
-# ---- Extract from 100% MCP ----
-
-#  A. ---- LAYERS ANTONIO ----
-
-# 1. --- Vegetation ---
+#  ---- 1. CREATE LAYERS ----
+  #  ---- 1.1 Vegetation ----
 
 setwd("C:/Users/Ana/Documents/Norway/NHBD_humans/Antonio/GIS/vegetation")
 veg <- raster('veg_25.tif') # 25 x 25
@@ -60,8 +34,8 @@ water <- raster("waterlands.tif")
 mountains <- raster("mountainlands.tif")
 
 
-#Moving window vegetation:
-#Calculate the proportion of each habitat in a 5x5 moving window
+# Moving window vegetation:
+# Calculate the proportion of each habitat in a 5x5 moving window
 # In one cell, proportion of that habitat in the 25 neighbouring cells
 
 prop.hab<-function(r1,gri=3,na.rm=TRUE){
@@ -90,7 +64,7 @@ writeRaster(water_pro,filename='water_pro',format='GTiff',overwrite=TRUE)
 mountains_pro <- prop.hab(mountains, gri=5)
 writeRaster(mountains_pro,filename='mountains_pro',format='GTiff')
 
-# 2. --- TRI ---
+  #  ---- 1.2. TRI ----
 
 setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/GIS/Clips")
 dem <- raster('clip_dem.tif')
@@ -112,15 +86,20 @@ setwd("C:/Users/Ana/Documents/Norway/NHBD_humans/Antonio/GIS/Analysis")
 writeRaster(tri5, "tri5", format = "GTiff") # Saved in folder Analysis
 
 
-#  B. ---- COORDINATES ----
+
+#  ---- 2. COORDINATES ----
 
 setwd("~/Norway/NHBD_humans")
 d <- read.csv("all_points.csv", header = TRUE)
+coord <- d[ ,c("x_UTM","y_UTM")] # Coordinates used and random
 
-#  C. ---- EXTRACT ----
+
+
+#  ---- 3. EXTRACT ----
 
 setwd("~/Norway/NHBD_humans/Antonio/GIS/Analysis")
 
+# Load layers
 humanlands <- raster("humland_pro.tif")
 agri <- raster("agri_pro.tif")
 plot(agri)
@@ -138,8 +117,10 @@ main <- raster("main25m.tif")
 sec <- raster("2nd25m.tif")
 stack_roads <- stack(main, sec)
 
-coord <- d[ ,c("x_UTM","y_UTM")] # Coordinates used and random
+build <- raster("dist_build25.tif")
 
+
+# Extract values
 cells <- cellFromXY(stack_veg, coord) # 1. Tells the number of the cells where the coord. fall
 cov_veg <- stack_veg[cells]           # 2. Returns the value of those cells in the stack
 
@@ -149,26 +130,11 @@ cov_dem <- stack_dem[cells]
 cells <- cellFromXY(stack_roads, coord) 
 cov_roads <- stack_roads[cells] 
 
-df <- data.frame(d, cov_veg, cov_dem, cov_roads) # Join coordinates with extracted values
-
-df$Season <- 0 # Include season
-df$Season[grep("_s", df$territory, ignore.case = TRUE)] <- 1
-df$Season[grep("_w", df$territory, ignore.case = TRUE)] <- 2
-
-setwd("~/Norway/NHBD_humans/Antonio")
-write.csv (df, "covariates_Antonio.csv")
-
-# Extract distance to buildings (I forgot!)
-
-build <- raster("dist_build25.tif")
 cells <- cellFromXY(build, coord) 
 cov_build <- build[cells] 
 
-setwd("~/Norway/NHBD_humans/Antonio")
-cov <- read.csv("covariates_Antonio.csv") # Load the rest already extracted
-cov <- cov[ ,-c(17)] #??? Remove season becaust its useless
-colnames(cov)[3] <- "territory" # Change name of territory column because its annoying
-all_cov <- data.frame(cov,cov_build)
+df <- data.frame(d, cov_veg, cov_dem, cov_roads, cov_build) # Join coordinates with extracted values
+
 
 setwd("~/Norway/NHBD_humans/Antonio")
 write.csv (all_cov, "covariates_Antonio.csv")
