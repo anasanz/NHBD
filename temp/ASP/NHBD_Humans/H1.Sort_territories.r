@@ -61,3 +61,5 @@ j <- j[which(complete.cases(j[,c(11:25)])), ]
 write.csv(j,"data_pairs_human_complete.csv")
 
 
+
+  # 3. ---- Guys missing from 2015 ----

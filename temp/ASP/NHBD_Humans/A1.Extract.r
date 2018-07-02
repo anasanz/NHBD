@@ -97,7 +97,7 @@ coord <- d[ ,c("x_UTM","y_UTM")] # Coordinates used and random
 
 #  ---- 3. EXTRACT ----
 
-setwd("~/Norway/NHBD_humans/Antonio/GIS/Analysis")
+setwd("~/Norway/NHBD_humans/GIS/Analysis")
 
 # Load layers
 humanlands <- raster("humland_pro.tif")
@@ -119,6 +119,8 @@ stack_roads <- stack(main, sec)
 
 build <- raster("dist_build25.tif")
 
+closestcosa <- raster("closestcosa.tif")
+
 
 # Extract values
 cells <- cellFromXY(stack_veg, coord) # 1. Tells the number of the cells where the coord. fall
@@ -133,11 +135,13 @@ cov_roads <- stack_roads[cells]
 cells <- cellFromXY(build, coord) 
 cov_build <- build[cells] 
 
+cells <- cellFromXY(closestcosa, coord) 
+closest <- closestcosa[cells] 
+
 df <- data.frame(d, cov_veg, cov_dem, cov_roads, cov_build) # Join coordinates with extracted values
 
-
 setwd("~/Norway/NHBD_humans/Antonio")
-write.csv (all_cov, "covariates_Antonio.csv")
+write.csv (df, "covariates_Antonio.csv")
 
 
 

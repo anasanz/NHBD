@@ -64,6 +64,7 @@ setwd("~/Norway/NHBD_humans/Antonio")
 write.csv(m,"coef_Antonio_new.csv")
 
 
+
 # ---- 2. PCA ----
 
 library(factoextra)
@@ -140,3 +141,70 @@ summary(lm3)
 lm4 <- lm (pc$x[,4]~data$bears)
 summary(lm4) 
 plot(lm4)
+
+
+# ---- 3. New coefficients including distance to closest human feature
+
+setwd("~/Norway/NHBD_humans/Antonio")
+d <- read.csv("covariates_Antonio.csv")
+
+d <- d[ , which(colnames(d) %in% c("territory", "used", "forest_pro", "clip_dem",
+                                   "tri5", "main25m", "X2nd25m", "cov_build", "closest"))]
+
+# Scale by territory
+terr <- unique(d$territory) 
+
+for(i in 1:length(terr)){
+  d[d$territory==terr[i],c(3:9)] <- scale(d[d$territory==terr[i],c(3:9)])
+}
+
+# Run one model for each territory
+
+IDD <- unique(d$territory)
+
+m <- matrix(NA, ncol=9, nrow=length(unique(d$territory)))
+m <-data.frame(m)
+colnames(m) <- c("territory","(Intercept)", "forest_pro","tri5", 
+                 "clip_dem", "main25m", "X2nd25m", "cov_build", "closest")
+rownames(m) <- IDD
+
+glm.list <-list()
+
+for(i in 1:length(IDD)){
+  data1 <- d[d$territory==IDD[i],] # Select one territory
+  used <- data1$used
+  data1 <- data1[,3:9] # Select only variables to put in the model
+  variables <- apply(data1, 2, function(x) sum(is.na(x))==length(x) ) # Select variables without NA (FALSE) in the territory
+  variablestrue <- names(variables[variables==FALSE]) # Names variables without NA in the territory
+  df <- data1[,variables!=TRUE] # Data frame variables without NA
+  
+  form <-as.formula(paste("used ~ ", paste(variablestrue, collapse= "+"))) # Create formula with variables without NA
+  
+  glm.list[[i]] <- glm (form, # Run model
+                        family = binomial (link = "logit"),
+                        data =df )
+  
+  glm.list.coef <- as.data.frame(glm.list[[i]]$coefficients) # Store it
+  m[i, as.character(rownames(glm.list.coef))] <- glm.list[[i]]$coefficients
+  
+} 
+
+m$territory <- rownames(m)
+
+#Seems like Tandsjon_2012_s is the one that doesnt converge
+t <- d[which(d$territory == "Tandsjon_2012_s"), ]
+t_random <- t[which(t$used == 0), ]
+t_used <- t[which(t$used == 1), ]
+
+unique(t_random$closest)
+hist(t_random$closest)
+unique(t_used$closest)
+hist(t_used$closest)
+
+unique(t_random$main25m)
+hist(t_random$main25m)
+unique(t_used$main25m)
+hist(t_used$main25m)
+
+setwd("~/Norway/NHBD_humans")
+write.csv(m,"coef_human.csv")
