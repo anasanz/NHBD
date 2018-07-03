@@ -25,7 +25,9 @@ library(splitstackshape)
 setwd("~/Documents/NHBD/Data")
 setwd("C:/My_documents/ana/nhbd/NHBD/Data")
 buffer.size <- seq(25000, 300000, by=5000)
-for(xxx in 2:length(buffer.size)){
+
+buffer.size <- buffer.size[c(10,14)]
+for(xxx in 1:length(buffer.size)){
   ## ==== I. LOAD NECESSARY DATA ====
   
   # THE STUDY AREA 
