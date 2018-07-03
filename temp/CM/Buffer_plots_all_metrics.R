@@ -91,7 +91,7 @@ for(i in 1:8){
 nhbd_short_M_Kmeans[[i]] <- nhbd_short_F_Kmeans[[i]] <- nhbd_medium_M_Kmeans[[i]] <- 0
 nhbd_medium_F_Kmeans[[i]] <- nhbd_long_M_Kmeans[[i]] <- nhbd_long_F_Kmeans[[i]] <- 0
 }
-xxx=1
+xxx=10
 for(xxx in 1:length(buffer.size)){
 
 ## ====  2. LOAD e OBJECT WITH AVAIALBLE POINTS DRAWN FROM BUFFER SIZE ====
