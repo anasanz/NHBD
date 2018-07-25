@@ -120,6 +120,7 @@ stack_roads <- stack(main, sec)
 build <- raster("dist_build25.tif")
 
 closestcosa <- raster("closestcosa.tif")
+closestcosita <- raster("d_rd_build.tif")
 
 
 # Extract values
@@ -138,7 +139,10 @@ cov_build <- build[cells]
 cells <- cellFromXY(closestcosa, coord) 
 closest <- closestcosa[cells] 
 
-df <- data.frame(d, cov_veg, cov_dem, cov_roads, cov_build) # Join coordinates with extracted values
+cells <- cellFromXY(closestcosita, coord) 
+closest2 <- closestcosita[cells] 
+
+df <- data.frame(d, cov_veg, cov_dem, cov_roads, cov_build, closest, closest2) # Join coordinates with extracted values
 
 setwd("~/Norway/NHBD_humans/Antonio")
 write.csv (df, "covariates_Antonio.csv")

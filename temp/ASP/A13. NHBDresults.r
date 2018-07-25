@@ -10423,6 +10423,7 @@ df[df$Sex=="F" & df$Trajectory=="Long" & df$Method=="10C",c(4:8)] <- c(values[1]
 
 
 
+
 # 1---- RESULTS GRAPH ----
 
 setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
@@ -10511,6 +10512,7 @@ legend(x=30,y=10, legend = unique(r$Method)[6:10], col = c[r$Method][6:10],
        pch = 18, cex = 0.85,bty="o",bg=grey(0.9),box.col=grey(0.9)  )
 
 
+
 # 2---- NATAL AV. GRAPH ----
 
 setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
@@ -10532,6 +10534,7 @@ axis(2)
 
 legend(x=2.5,y=80, legend = unique(av$Sex), col = c("blue","red"),
        pch = 18, cex = 0.85,bty="o",bg=grey(0.9),box.col=grey(0.9) )
+
 
 # 3---- General results whole population(Coefficients env covariates and wolf density effect)----
 setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
@@ -10693,4 +10696,54 @@ c <- clogit(Category ~ E  + wolf_density * E  + Sex * E
             + strata(ID_individual), clr)	
 summary(c)
 confint(c,level = 0.95)
+
+
+
+# 4---- Export data for submission (6 K-means and distance metric)----
+
+setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+e1 <- read.csv("Data_NHBD_id_wolf_density_distances.csv") # File with dispersal distances
+e1$ID_individual <- as.numeric(e1$ID_individual)
+colnames(e1)[26] <- "Kmeans_6C"
+
+setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Multivariate")
+clu <- read.csv("ManyClusters") # Different cluster divisions
+e1$C4 <- clu$Clusters_4
+e1$C5 <- clu$Clusters_5
+e1$C7 <- clu$Clusters_7
+e1$C8 <- clu$Clusters_8
+e1$C9 <- clu$Clusters_9
+e1$C10 <- clu$Clusters_10
+
+setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Multivariate")
+m <- read.csv("ManyClusterMethods") # Different clustering methods
+e1$Pam_6C <- m$Clusters_pam
+e1$Hier_6C <- m$Clusters_hier
+
+e1$dispersal_distance <- NA
+e1$dispersal_distance <- as.character(e1$dispersal_distance)
+
+for (i in 1:nrow(e1)) {
+  if (e1$dist[i] <= 40000) {e1$dispersal_distance[i] = "Short"}
+  if (e1$dist[i] > 40000 & e1$dist[i] <= 200000) {e1$dispersal_distance[i] = "Medium"}
+  if (e1$dist[i] > 200000) {e1$dispersal_distance[i] = "Long"}
+}
+
+library(dplyr)
+e1 <- arrange(e1, Sex, desc(dispersal_distance), ID_individual)
+
+e1 <- e1[, which(colnames(e1) %in% c("ID_individual", "Sex", "Category",
+                                   "human_1", "forest_1", "water_1", "mountains_1", "mainroad_1", "bear_1", 
+                                   "slope_1" ,"roadbuild_1", "moose_dens", "wolf_density",
+                                   "distance", "Kmeans_6C", "Pam_6C", "Hier_6C",
+                                   "C4", "C5", "C7", "C8", "C9", "C10",
+                                   "dispersal_distance"))]
+
+write.csv(e1, "Data_resubmission2.csv")
+
+
+
+
+
+ 
 

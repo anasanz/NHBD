@@ -5,8 +5,9 @@ library(lme4)
 
 # 0. ---- Exploratory selection coefficients ----
 # Is there a difference in the way they select main and secondary roads?
-setwd("~/Norway/NHBD_humans/Antonio")
-c <- read.csv("coef_Antonio_new.csv", sep = ";")
+#setwd("~/Norway/NHBD_humans/Antonio")
+setwd("~/Norway/NHBD_humans")
+c <- read.csv("coef_Antonio_new.csv", sep = ",")
 c <- c[ ,-c(1)]
 colnames(c)[1] <- "Territory_antonio"
 
@@ -17,9 +18,6 @@ abline(v=0)
 sum(length(which(c$main25m > 0 & c$X2nd25m > 0)) + length(which(c$main25m < 0 & c$X2nd25m < 0))) # 26/47 in the same direction
 
 # In PCA of natal territories, they seem to have different proportions of main and secondary roads
-
-
-
 
 # 1. ---- Characterize natal territories ----
 
@@ -71,8 +69,10 @@ natal$PC <- pc$x[ ,1]
 natal$PC2 <- pc$x[ ,2]
 
 
-
 # 2. ---- Link with coefficients ----
+
+#coef_human.csv contains the variable "closest" (minimun distance to mainroads,buildings,secroads)
+#coef_human2.csv contains the variable "closest2" (minimun distance to mainroads,buildings)
 
 setwd("~/Norway/NHBD_humans")
 c <- read.csv("coef_human.csv", sep = ";")
@@ -81,6 +81,16 @@ colnames(c)[1] <- "Territory_antonio"
 
 
 e <- left_join(natal,c, by = "Territory_antonio")
+
+
+setwd("~/Norway/NHBD_humans")
+c2 <- read.csv("coef_human2.csv", sep = ";")
+c2 <- c2[ ,-c(1)]
+colnames(c2)[1] <- "Territory_antonio"
+
+
+e <- left_join(natal,c, by = "Territory_antonio")
+
 
 e$Season <- 0 # Add season (Summer/Winter = 1/0)
 e$Season[grep("_s", e$Territory_antonio, ignore.case = TRUE)] <- 1
@@ -116,7 +126,7 @@ abline(lm(e$cov_build ~ e$PC))
 hist(e$PC)
 prov <- e[-which(e$PC > 4), ] #Removing outliers
 
-plot(prov$PC,prov$cov_build, pch = 16, col = col_season)
+plot(prov$PC,prov$cov_build, pch = 16)
 abline(lm(prov$cov_build ~ prov$PC)) # Overall trend not significant for all together
 summary(lm(prov$cov_build ~ prov$PC))
 
@@ -144,11 +154,12 @@ plot(prov$PC2,prov$X2nd25m, pch = 16) # Overall trend not significant for all to
 abline(lm(prov$X2nd25m ~ prov$PC2)) 
 summary(lm(prov$X2nd25m ~ prov$PC2))
 
-# Closest cosa
+# Closest cosa (minimun distance to mainroads,buildings,secroads)
 
 #With PC1
 
 hist(e$closest)
+which(e$closest>1)
 prov <- e[-which(e$PC > 6), ] #Removing outliers PC
 prov <- prov[-which(prov$closest > 200), ]
 
@@ -165,10 +176,21 @@ plot(prov$PC2,prov$closest, pch = 16) # Overall trend not significant for all to
 abline(lm(prov$closest ~ prov$PC2)) 
 summary(lm(prov$closest ~ prov$PC2))
 
+# Closest cosa2 (minimun distance to mainroads,buildings)
+
+#With PC1
+
+hist(e$closest2)
+hist(e$PC)
+prov <- e[-which(e$PC > 6), ] #Removing outliers PC
+prov <- prov[-which(prov$closest2 > 2), ]
+
+plot(prov$PC,prov$closest2, pch = 16) # Overall trend not significant for all together
+abline(lm(prov$closest2 ~ prov$PC)) 
+summary(lm(prov$closest2 ~ prov$PC))
 
 
-
-  # A. ---- SIMPLE MODEL ----
+  # A. ---- SIMPLE MODEL (Not very interesting, we need random effects) ----
     # 1. ---- RESPONSE: MAIN ROADS COEFFICIENT ----
 
 m1 <- lm(main25m ~ PC + forest_1 + bear_1 + Sex + Season, prov)
@@ -197,6 +219,7 @@ plot(prov_m$PC,prov_m$main25m, pch = 16, col = col_season)
 abline(lm(prov_m$main25m ~ prov_m$PC))
 
   # 2. RESPONSE: DISTANCE TO BUILDINGS COEFFICIENT
+
 
 
 
@@ -274,31 +297,31 @@ intervals(fm1, level = 0.95) # NO WARNINGS; Very slight overlap
 m2 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex + 
              Season + PC*Sex + (1|ID_pair), data = prov) # Sex, With interaction, season
 summary(m2)
-confint(m2) # WARNINGS
+confint(m2) 
 
 m3 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex + 
              Season + (1|ID_pair), data = prov) #Without interaction
 summary(m3)
-confint(m3) # WARNINGS
+confint(m3) 
 
 AIC(m2,m3) # Better without
 
 m4 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex
            + (1|ID_pair), data = prov) # Si sex, No season
 summary(m4)
-confint(m4) # WARNINGS, Overlap
+confint(m4) # Overlap
 
 m5 <- lmer(cov_build ~ PC + forest_1 + bear_1 +
              Season + (1|ID_pair), data = prov) # No sex
 summary(m5)
-confint(m5) # WARNINGS, Overlap
+confint(m5) # Overlap
 
 m6 <- lmer(cov_build ~ PC + forest_1 + bear_1
            + (1|ID_pair), data = prov) #No season no sex
 
 AIC(m3, m4, m5, m6) # Better without
 summary(m6)
-confint(m6) # WARNINGS, Overlap
+confint(m6) # Overlap
 
 
 # BY SEX
@@ -324,7 +347,7 @@ library(nlme)
 fm1 <- lme(cov_build ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov_f)
 summary(fm1)
-intervals(fm1, level = 0.95) # Cant get them...
+intervals(fm1, level = 0.95) 
 
     # ---- 3. RESPONSE: CLOSEST COSA - PC ----
 
@@ -333,7 +356,7 @@ intervals(fm1, level = 0.95) # Cant get them...
 m2 <- lmer(closest ~ PC + forest_1 + bear_1 + Sex + 
              Season + PC*Sex + (1|ID_pair), data = prov) # Sex, With interaction, season
 summary(m2)
-confint(m2) # WARNINGS
+confint(m2) 
 
 m3 <- lmer(closest ~ PC + forest_1 + bear_1 + Sex + 
              Season + (1|ID_pair), data = prov) #Without interaction
@@ -384,3 +407,88 @@ fm1 <- lme(closest ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov_f)
 summary(fm1)
 intervals(fm1, level = 0.95) # Cant get them...
+
+    # ---- 4. RESPONSE: CLOSEST COSA 2 - PC ----
+
+#ALL
+
+m2 <- lmer(closest2 ~ PC + forest_1 + bear_1 + Sex + 
+             Season + PC*Sex + (1|ID_pair), data = prov) # Sex, With interaction, season
+summary(m2)
+confint(m2) # 1 WARNING, OVERLAP
+
+m3 <- lmer(closest2 ~ PC + forest_1 + bear_1 + Sex + 
+             Season + (1|ID_pair), data = prov) #Without interaction
+summary(m3)
+confint(m3) # OVERLAP
+
+AIC(m2,m3) # Better without
+
+m4 <- lmer(closest2 ~ PC + forest_1 + bear_1 + Sex
+           + (1|ID_pair), data = prov) # Si sex, No season
+summary(m4)
+confint(m4) # NO WARNINGS!! Overlap
+
+m5 <- lmer(closest2 ~ PC + forest_1 + bear_1 +
+             Season + (1|ID_pair), data = prov) # No sex, Si season
+summary(m5)
+confint(m5) # NO WARNINGS!! Overlap
+
+m6 <- lmer(closest2 ~ PC + forest_1 + bear_1
+           + (1|ID_pair), data = prov) #No season no sex
+
+AIC(m3, m4, m5, m6) # Same with and without season (m5 and m6)
+summary(m6)
+confint(m6) # NO WARNINGS!! Overlap
+
+
+# BY SEX
+
+#Females
+prov_f <- prov[which(prov$Sex == "F"), ] 
+m_f2 <- lmer(closest2 ~ PC + forest_1 + bear_1 + 
+               Season + (1|ID_pair), data = prov_f) # SI SEASON
+summary(m_f2)
+confint(m_f2) # FEMALES: WARNINGS, OVERLAP
+warnings()
+
+m_f3 <- lmer(closest2 ~ PC + forest_1 + bear_1 + (1|ID_pair), data = prov_f) # NO SEASON
+summary(m_f3)
+confint(m_f3) # FEMALES: NO WARNINGS!!, OVERLAP (Is season giving problems?)
+
+#Males
+prov_m <- prov[which(prov$Sex == "M"), ] 
+m_m2 <- lmer(closest2 ~ PC + forest_1 + bear_1 + 
+               Season + (1|ID_pair), data = prov_m) # SI SEASON
+summary(m_m2)
+confint(m_m2) # MALES: OVERLAP 0; Convergence problems?
+
+m_m3 <- lmer(closest2 ~ PC + forest_1 + bear_1 + (1|ID_pair), data = prov_m) # NO SEASON
+summary(m_m3)
+confint(m_m3) # MALES: OVERLAP 0; Convergence problems?
+
+#Try with nlme to see if the warning is fixed
+library(nlme)
+
+#Females: No effect
+fm1 <- lme(closest2 ~ PC + forest_1 + bear_1 + Season, # SI SEASON
+           random = ~ 1|ID_pair, data = prov_f)
+summary(fm1)
+intervals(fm1, level = 0.95) 
+
+fm2 <- lme(closest2 ~ PC + forest_1 + bear_1,# NO SEASON 
+           random = ~ 1|ID_pair, data = prov_f)
+summary(fm2)
+intervals(fm2, level = 0.95)  # NO WARNINGS
+
+#Males: Almost significant :O
+mm1 <- lme(closest2 ~ PC + forest_1 + bear_1 + Season, # SI SEASON
+           random = ~ 1|ID_pair, data = prov_m)
+summary(mm1)
+intervals(mm1, level = 0.95) 
+
+mm2 <- lme(closest2 ~ PC + forest_1 + bear_1,# NO SEASON 
+           random = ~ 1|ID_pair, data = prov_m)
+summary(mm2)
+intervals(mm2, level = 0.95)  # NO WARNINGS
+

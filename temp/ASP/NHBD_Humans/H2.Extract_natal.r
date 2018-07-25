@@ -6,7 +6,8 @@ load("stack.RData") # Load layers
 setwd("~/Norway/NHBD_humans")
 d <- read.csv("data_pairs_human.csv", header = TRUE) #Load territory coordinates
 
-disper<-d[ ,c("X_birth_F","Y_birth_F")] # Extract female birth territory values
+# Extract female birth territory values
+disper<-d[ ,c("X_birth_F","Y_birth_F")] 
 natal_F <- extract(stack,disper,method='simple',buffer=17841,small=TRUE,fun=mean,na.rm=TRUE,df=TRUE,factors=TRUE,sp=TRUE)
 natal_FID <- bind_cols(d[ , which(colnames(d) %in% c("ID_F", "Sex_GPS", "Territory_antonio"))], natal_F) #Join IDs and whether if was the female
                                                                                     #the one with the GPS collar
@@ -15,8 +16,8 @@ natal_FID <- natal_FID[ ,which(colnames(natal_FID) %in% c("Territory_antonio","S
                                                         "F_roadens_sec1", "F_mainroad_1", "F_bear_1", "F_roadbuild_1",
                                                         "F_build_1"))] # Select human & interesting variables
 
-
-disper<-d[ ,c("X_birth_M","Y_birth_M")] # Extract male birth territory values
+# Extract male birth territory values
+disper<-d[ ,c("X_birth_M","Y_birth_M")] 
 natal_M <- extract(stack,disper,method='simple',buffer=17841,small=TRUE,fun=mean,na.rm=TRUE,df=TRUE,factors=TRUE,sp=TRUE)
 natal_MID <- bind_cols(d[ , which(colnames(d) %in% c("ID_M", "Sex_GPS"))], natal_M)
 colnames(natal_MID)[4:32] <- paste("M",colnames(natal_MID)[4:32], sep = "_")
