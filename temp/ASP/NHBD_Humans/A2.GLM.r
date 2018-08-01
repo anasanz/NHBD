@@ -143,7 +143,7 @@ summary(lm4)
 plot(lm4)
 
 
-# ---- 3. New coefficients including distance to closest human feature
+# ---- 3. New coefficients including distance to closest human feature ----
 # The variable "closest" is distance to closest human feature including main roads, buildings and sec. roads
 # The variable "closest2" is distance to closest human feature including only main roads and buildings
 

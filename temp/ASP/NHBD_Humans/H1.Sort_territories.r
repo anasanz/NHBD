@@ -11,7 +11,8 @@ p <- p[ , c(1:7)]
 
   # 1. --- Track partner ----
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
+#setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
+setwd("~/MASTER THESIS/Data")
 m <- read.csv("natal_established_territories.csv", sep = ";")
 
 #For each established territory, one column for each sex (ID_M/ID_F)
@@ -57,9 +58,10 @@ colnames(d_f)[c(2:9)] <- c("ID_F","Birth_territory_F", "Y_birth_F",  "X_birth_F"
                          "X_Established_F", "Year.establishment_F")
 j <- left_join(j,d_f, by = "ID_F")
 
-j <- j[which(complete.cases(j[,c(11:25)])), ]
 write.csv(j,"data_pairs_human_complete.csv")
 
+# 3. ---- Join guys missing from 2015 without data in dispersal_human (because is from NHBD 1) ----
+# This data has been manually included in data_pairs_human_complete
 
 
-  # 3. ---- Guys missing from 2015 ----
+
