@@ -10,7 +10,7 @@ library(lme4)
 
 #setwd("~/Norway/NHBD_humans/Antonio")
 setwd("~/Norway/NHBD_humans")
-c <- read.csv("coef_Antonio_new.csv", sep = ",")
+c <- read.csv("coef_human.csv", sep = ";")
 c <- c[ ,-c(1)]
 colnames(c)[1] <- "Territory_antonio"
 
@@ -26,7 +26,7 @@ sum(length(which(c$main25m > 0 & c$X2nd25m > 0)) + length(which(c$main25m < 0 & 
 # 1. ---- Characterize natal territories ----
 
 setwd("~/Norway/NHBD_humans")
-v <- read.csv("natal_values.csv", header = TRUE) #Load extracted natal values
+v <- read.csv("natal_values_complete.csv", header = TRUE) #Load extracted natal values
 v$ID_pair <- paste(v$ID_F,v$ID_M,sep = "_") # Create ID_pair column to add it as random in the model
 
 
@@ -54,6 +54,8 @@ m$Sex <- "M"
 
 #Join
 natal <- bind_rows(f,m) # Contains natal values of all territories
+#Delete NA inmigrant males
+natal <- natal[complete.cases(natal), ]
 
   # B. ---- PCA to characterize natal territories ----
 
@@ -64,6 +66,7 @@ library(factoextra)
 
 n <- natal[ ,colnames(natal) %in% c("Territory_antonio", "ID", "human_1", "humanlands_1", "agri_1", "mainroad_1", "roadbuild_1",
                                     "roadens_sec1", "build_1")] # Only human-related variables
+
 sd_n<- as.data.frame(scale(n[3:9]))
 pc <- prcomp(sd_n)
 fviz_pca_biplot(pc, label="var",col.var = "black") +
@@ -84,8 +87,8 @@ natal$PC2 <- pc$x[ ,2]
 ################### Check natal territory of wolves with high natal values ###
 
 natal[which(natal$PC > 5), ] # Kloten and Stadra
-setwd("~/MASTER THESIS/Data")
-hum <- read.csv("data_pairs_human.csv", sep = ",")
+setwd("~/Norway/NHBD_humans")
+hum <- read.csv("data_pairs_human_complete.csv", sep = ";")
 
 natal[which(natal$PC2 < -4), ] # Stadra
 
