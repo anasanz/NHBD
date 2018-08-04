@@ -64,10 +64,10 @@ natal <- natal[complete.cases(natal), ]
 
 library(factoextra)
 
-n <- natal[ ,colnames(natal) %in% c("Territory_antonio", "ID", "human_1", "humanlands_1", "agri_1", "mainroad_1", "roadbuild_1",
+n <- natal[ ,colnames(natal) %in% c("Territory_antonio", "ID", "human_1", "humanlands_1", "agri_1", "mainroad_1", #"roadbuild_1",
                                     "roadens_sec1", "build_1")] # Only human-related variables
 
-sd_n<- as.data.frame(scale(n[3:9]))
+sd_n<- as.data.frame(scale(n[3:8]))
 pc <- prcomp(sd_n)
 fviz_pca_biplot(pc, label="var",col.var = "black") +
   theme(text = element_text(size = 15),
@@ -76,7 +76,7 @@ fviz_pca_biplot(pc, label="var",col.var = "black") +
         panel.grid.minor = element_blank(),
         axis.line = element_line(colour = "black"),
         legend.key = element_rect(fill = "white"))
-
+pc$x
 
 pc$x[ ,1] #PC1 explains 72% of the variance and separates human (+) vS non-human (-) 
           # characterized territories
