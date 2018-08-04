@@ -192,6 +192,14 @@ for(i in 1:length(IDD)){
 m$territory <- rownames(m)
 
 #Seems like Tandsjon_2012_s is the one that doesnt converge with closest variable (all converge with closest2)
+
+d_used <- d[which(d$used == 1), ]
+tapply(d_used$territory, d_used$territory, length)
+tapply(d_used$tri5, d_used$territory, mean)
+
+
+
+
 t <- d[which(d$territory == "Tandsjon_2012_s"), ]
 t_random <- t[which(t$used == 0), ]
 t_used <- t[which(t$used == 1), ]
@@ -202,6 +210,7 @@ m_tand <- glm(used ~ forest_pro + tri5 + clip_dem + main25m + X2nd25m + cov_buil
 
 # The problem is the closest variable indeed
 
+length(t_random$closest)
 unique(t_random$closest)
 hist(t_random$closest)
 unique(t_used$closest)
