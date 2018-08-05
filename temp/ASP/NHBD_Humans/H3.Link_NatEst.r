@@ -92,17 +92,33 @@ hum <- read.csv("data_pairs_human_complete.csv", sep = ";")
 
 natal[which(natal$PC2 < -4), ] # Stadra
 
+# Kloten_2009_s and Kloten_2010_w (Individual M0918, natal territory = Krp2) have high values of human density and roadbuild
+# Stadra_2003_w (ID M0314, natal territory = Mos) have high values of human density
+# These territories fall in high human-dominated areas (south), so there is nothing wrong, they are real outliers.
+# They give us variation in human variables, so for the moment we keep them in the models.
+
 # 2. ---- Link with coefficients ----
 
 # There are 2 datasets:
 
-#2.1. coef_human.csv contains the variable "closest" (minimun distance to mainroads,buildings,secroads): 2 territories dont converge
-#2.2. coef_human2.csv contains the variable "closest2" (minimun distance to mainroads,buildings): all converge
+#2.1. coef_human.csv contains the variable "closest" (minimun distance to mainroads,buildings,secroads)
+#2.2. coef_human2.csv contains the variable "closest2" (minimun distance to mainroads,buildings)
+
+# In both of them, we remove the territories that had <250 positions for estimating the selection coefficients, which are:
+
+setwd("~/Norway/NHBD_humans/Antonio")
+d <- read.csv("covariates_Antonio.csv")
+
+d_used <- d[which(d$used == 1), ] # Select used (gps positions)
+tapply(d_used$territory, d_used$territory, length) # nº positions/territory
+
+positions <- as.data.frame(tapply(d_used$territory, d_used$territory, length)) # Data frame with nº of positions/territory
+remove <- rownames(positions)[which(positions$`tapply(d_used$territory, d_used$territory, length)` < 250)] # Remove the ones < 250
 
 # 2.1. ----- Dataset with "closest" variable ----
 
 setwd("~/Norway/NHBD_humans")
-c <- read.csv("coef_human.csv", sep = ";")
+c <- read.csv("coef_human.csv", sep = ",")
 c <- c[ ,-c(1)]
 colnames(c)[1] <- "Territory_antonio"
 
@@ -111,13 +127,8 @@ e <- left_join(natal,c, by = "Territory_antonio")
 e$Season <- 0 # Add season (Summer/Winter = 1/0)
 e$Season[grep("_s", e$Territory_antonio, ignore.case = TRUE)] <- 1
 
-### Check outliers
+prov <- e[-which(e$Territory_antonio %in% remove), ] # Remove territories with < 250 positions to estimate selection coefficients
 
-# In natal values:
-hist(e$PC) # Two outliers caused by high natal values
-prov <- e[-which(e$PC > 4), ]
-#In selection coefficients because it didnt converge (Tandsjon_2012_s)
-prov <- prov[-which(prov$Territory_antonio == "Tandsjon_2012_s"), ]
 
 ## Make one dataset for each sex for analyses
 
@@ -209,12 +220,12 @@ abline(lm(prov_m$main25m ~ prov_m$PC))
 m2 <- lmer(main25m ~ PC + forest_1 + bear_1 + Sex + 
              Season + PC*Sex + (1|ID_pair), data = prov) # Sex, With interaction, season
 summary(m2)
-confint(m2) #Overlap 0
+confint(m2) 
 
 m3 <- lmer(main25m ~ PC + forest_1 + bear_1 + Sex + 
              Season + (1|ID_pair), data = prov) #Without interaction
 summary(m3)
-confint(m3) #Overlap 0
+confint(m3) 
 
 AIC(m2,m3) # Better without interaction (m3)
 
@@ -226,12 +237,12 @@ confint(m4) # Overlap 0
 m5 <- lmer(main25m ~ PC + forest_1 + bear_1 +
              Season + (1|ID_pair), data = prov) # No sex
 summary(m5)
-confint(m5) #Overlap 0
+confint(m5) 
 
 m6 <- lmer(main25m ~ PC + forest_1 + bear_1
            + (1|ID_pair), data = prov) #No season no sex
 summary(m6)
-confint(m6) #Overlap 0
+confint(m6) 
 
 AIC(m3, m4, m5, m6) # Better without season and sex (m6)
 
@@ -241,16 +252,16 @@ AIC(m3, m4, m5, m6) # Better without season and sex (m6)
 m_f2 <- lmer(main25m ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov_f)
 summary(m_f2)
-confint(m_f2) # FEMALES: SLIGHT OVERLAP 0; WARNINGS
+confint(m_f2) 
 warnings()
 
 
 m_m2 <- lmer(main25m ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov_m)
 summary(m_m2)
-confint(m_m2) # MALES: NO OVERLAP 0; WARNINGS
+confint(m_m2) 
 
-#Try with nlme to see if the warning is fixed
+#Try with nlme to see if the warning is fixed: WARNINGS FIXED, USE THIS ONES
 
 library(nlme)
 
@@ -259,10 +270,11 @@ fm1 <- lme(main25m ~ PC + forest_1 + bear_1 + Season,
 summary(fm1)
 intervals(fm1, level = 0.95) # FEMALES: SLIGHT OVERLAP 0; NO WARNINGS
 
+
 mm1 <- lme(main25m ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov_m)
 summary(mm1)
-intervals(mm1, level = 0.95) # MALES: SLIGHT OVERLAP 0; NO WARNINGS!!!!!
+intervals(mm1, level = 0.95) # MALES: OVERLAP 0; NO WARNINGS
 
 
       # ---- 2. RESPONSE: DISTANCE TO BUILDINGS COEFFICIENT ----
@@ -272,32 +284,32 @@ intervals(mm1, level = 0.95) # MALES: SLIGHT OVERLAP 0; NO WARNINGS!!!!!
 m2 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex + 
              Season + PC*Sex + (1|ID_pair), data = prov) # Sex, With interaction, season
 summary(m2) 
-confint(m2) # Overlap 0
+confint(m2) 
 
 m3 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex + 
              Season + (1|ID_pair), data = prov) #Without interaction
 summary(m3)
-confint(m3) # Overlap 0; WARNINGS
+confint(m3) 
 
 AIC(m2,m3) # Better without
 
 m4 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex
            + (1|ID_pair), data = prov) # Si sex, No season
 summary(m4)
-confint(m4) # Overlap 0; WARNINGS
+confint(m4) 
 
 m5 <- lmer(cov_build ~ PC + forest_1 + bear_1 +
              Season + (1|ID_pair), data = prov) # No sex
 summary(m5)
-confint(m5) # Overlap 0; WARNINGS
+confint(m5) 
 
 m6 <- lmer(cov_build ~ PC + forest_1 + bear_1
            + (1|ID_pair), data = prov) #No season no sex
 
 summary(m6)
-confint(m6) # Overlap 0; WARNINGS
+confint(m6) 
 
-AIC(m3, m4, m5, m6) # Better without Sex but with Season (m5)
+AIC(m3, m4, m5, m6) # Best m6
 
 
 ### BY SEX
@@ -307,7 +319,7 @@ AIC(m3, m4, m5, m6) # Better without Sex but with Season (m5)
 m_f2 <- lmer(cov_build ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov_f)
 summary(m_f2)
-confint(m_f2) # FEMALES: OVERLAP 0; WARNINGS
+confint(m_f2) # FEMALES: OVERLAP 0; NO WARNINGS
 
 #Males
  
@@ -322,12 +334,12 @@ library(nlme)
 fm1 <- lme(cov_build ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov_f)
 summary(fm1)
-intervals(fm1, level = 0.95) # It doesnt work
+intervals(fm1, level = 0.95) 
 
 mm1 <- lme(cov_build ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov_m)
 summary(mm1)
-intervals(mm1, level = 0.95) # OVERLAP 0
+intervals(mm1, level = 0.95) # Doesnt work
 
       # ---- 3. RESPONSE: CLOSEST COSA - PC ----
 
@@ -335,30 +347,30 @@ intervals(mm1, level = 0.95) # OVERLAP 0
 
 m2 <- lmer(closest ~ PC + forest_1 + bear_1 + Sex + 
              Season + PC*Sex + (1|ID_pair), data = prov) # Sex, With interaction, season
-summary(m2) # OVERLAP 0; WARNINGS
+summary(m2) 
 confint(m2) 
 
 m3 <- lmer(closest ~ PC + forest_1 + bear_1 + Sex + 
              Season + (1|ID_pair), data = prov) #Without interaction
 summary(m3)
-confint(m3) # # OVERLAP 0; WARNINGS
+confint(m3)
 
 AIC(m2,m3) 
 
 m4 <- lmer(closest ~ PC + forest_1 + bear_1 + Sex
            + (1|ID_pair), data = prov) # Si sex, No season
 summary(m4)
-confint(m4) # # OVERLAP 0; WARNINGS
+confint(m4) 
 
 m5 <- lmer(closest ~ PC + forest_1 + bear_1 +
              Season + (1|ID_pair), data = prov) # No sex
 summary(m5)
-confint(m5) # # OVERLAP 0; WARNINGS
+confint(m5) 
 
 m6 <- lmer(closest ~ PC + forest_1 + bear_1
            + (1|ID_pair), data = prov) #No season no sex
 
-AIC(m3, m4, m5, m6) # Better with interaction?
+AIC(m3, m4, m5, m6) # Best m6
 summary(m6)
 confint(m6) # WARNINGS, Overlap
 
@@ -377,7 +389,7 @@ confint(m_f2) # FEMALES: OVERLAP 0; WARNINGS
 m_m2 <- lmer(closest ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov_m)
 summary(m_m2)
-confint(m_m2) # MALES: OVERLAP 0; NO WARNINGS
+confint(m_m2) # MALES: OVERLAP 0; WARNINGS
 
 #Try with nlme to see if the warning is fixed
 library(nlme)
@@ -385,7 +397,12 @@ library(nlme)
 fm1 <- lme(closest ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov_f)
 summary(fm1)
-intervals(fm1, level = 0.95) # Cant get them...
+intervals(fm1, level = 0.95) 
+
+mm1 <- lme(closest ~ PC + forest_1 + bear_1 + Season,
+           random = ~ 1|ID_pair, data = prov_m)
+summary(mm1)
+intervals(mm1, level = 0.95) # Doesnt work
 
 
       # ---- 4. RESPONSE: SEC ROADS COEFFICIENT ----
@@ -400,8 +417,8 @@ m3 <- lmer(X2nd25m ~ PC + forest_1 + bear_1 + Sex +
              Season + (1|ID_pair), data = prov2) #Without interaction
 summary(m3)
 confint(m3) 
-
-AIC(m2,m3) 
+ 
+AIC(m2,m3)#m3
 
 m4 <- lmer(X2nd25m ~ PC + forest_1 + bear_1 + Sex
            + (1|ID_pair), data = prov2) # Si sex, No season
@@ -418,7 +435,7 @@ m6 <- lmer(X2nd25m ~ PC + forest_1 + bear_1
 summary(m6)
 confint(m6) 
 
-AIC(m3, m4, m5, m6) 
+AIC(m3, m4, m5, m6) # Best 4 & 5
 
 
 ### BY SEX
@@ -426,7 +443,7 @@ AIC(m3, m4, m5, m6)
 m_f2 <- lmer(X2nd25m ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov_f)
 summary(m_f2)
-confint(m_f2) # FEMALES: SLIGHT OVERLAP 0; 1 WARNING
+confint(m_f2) # FEMALES: SLIGHT OVERLAP 0; WARNINGs
 warnings()
 
 
@@ -435,7 +452,7 @@ m_m2 <- lmer(X2nd25m ~ PC + forest_1 + bear_1 +
 summary(m_m2)
 confint(m_m2) # MALES: OVERLAP 0; WARNINGS
 
-#Try with nlme to see if the warning is fixed
+#Try with nlme to see if the warning is fixed: ITS FIXED
 
 fm1 <- lme(X2nd25m ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov_f)
@@ -445,13 +462,13 @@ intervals(fm1, level = 0.95) # FEMALES: SLIGHT OVERLAP 0; NO WARNINGS
 mm1 <- lme(X2nd25m ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov_f)
 summary(mm1)
-intervals(mm1, level = 0.95) # MALES: OVERLAP 0; NO WARNINGS
+intervals(mm1, level = 0.95) # MALES: SLIGHT OVERLAP 0; NO WARNINGS
 
 
 # 2.2. ---- Dataset with "closest2" variable ----
 
 setwd("~/Norway/NHBD_humans")
-c2 <- read.csv("coef_human2.csv", sep = ";")
+c2 <- read.csv("coef_human2.csv")
 c2 <- c2[ ,-c(1)]
 colnames(c2)[1] <- "Territory_antonio"
 
@@ -460,12 +477,11 @@ e2 <- left_join(natal,c2, by = "Territory_antonio")
 e2$Season <- 0 # Add season (Summer/Winter = 1/0)
 e2$Season[grep("_s", e2$Territory_antonio, ignore.case = TRUE)] <- 1
 
+prov2 <- e2[-which(e2$Territory_antonio %in% remove), ] # Remove territories with < 250 positions to estimate selection coefficients
+
+
 ### Check outliers
 
-# In natal values:
-hist(e2$PC) # Two outliers caused by high natal values
-prov2 <- e2[-which(e2$PC > 4), ]
-#In selection coefficients there is no outliers because it converged
 
 ## Make one dataset for each sex for analyses
 
@@ -527,29 +543,29 @@ summary(lm(prov2$closest2 ~ prov2$PC))
 m2 <- lmer(main25m ~ PC + forest_1 + bear_1 + Sex + 
              Season + PC*Sex + (1|ID_pair), data = prov2) # Sex, With interaction, season
 summary(m2)
-confint(m2) #Overlap 0
+confint(m2) 
 
 m3 <- lmer(main25m ~ PC + forest_1 + bear_1 + Sex + 
              Season + (1|ID_pair), data = prov2) #Without interaction
 summary(m3)
-confint(m3) #Overlap 0
+confint(m3) 
 
 AIC(m2,m3) # Better without interaction (m3)
 
 m4 <- lmer(main25m ~ PC + forest_1 + bear_1 + Sex
            + (1|ID_pair), data = prov2) # Si sex, No season
 summary(m4)
-confint(m4) # Overlap 0
+confint(m4) 
 
 m5 <- lmer(main25m ~ PC + forest_1 + bear_1 +
-             Season + (1|ID_pair), data = prov2) # No sex
+             Season + (1|ID_pair), data = prov2) 
 summary(m5)
-confint(m5) #Overlap 0
+confint(m5) 
 
 m6 <- lmer(main25m ~ PC + forest_1 + bear_1
            + (1|ID_pair), data = prov2) #No season no sex
 summary(m6)
-confint(m6) #Overlap 0
+confint(m6) 
 
 AIC(m3, m4, m5, m6) # Better without season and sex (m6)
 
@@ -559,13 +575,13 @@ AIC(m3, m4, m5, m6) # Better without season and sex (m6)
 m_f2 <- lmer(main25m ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov2_f)
 summary(m_f2)
-confint(m_f2) # FEMALES: SLIGHT OVERLAP 0; WARNINGS
+confint(m_f2) # FEMALES: OVERLAP 0; WARNINGS
 
 
 m_m2 <- lmer(main25m ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov2_m)
 summary(m_m2)
-confint(m_m2) # MALES: NO OVERLAP 0; WARNINGS
+confint(m_m2) # MALES: slight OVERLAP 0; WARNINGS
 
 #Try with nlme to see if the warning is fixed
 
@@ -589,14 +605,14 @@ intervals(mm1, level = 0.95) # Doesnt work
 m2 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex + 
              Season + PC*Sex + (1|ID_pair), data = prov2) # Sex, With interaction, season
 summary(m2) 
-confint(m2) # Overlap 0
+confint(m2) 
 
 m3 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex + 
              Season + (1|ID_pair), data = prov2) #Without interaction
 summary(m3)
-confint(m3) # Overlap 0
+confint(m3) 
 
-AIC(m2,m3) 
+AIC(m2,m3) # bEST M3
 
 m4 <- lmer(cov_build ~ PC + forest_1 + bear_1 + Sex
            + (1|ID_pair), data = prov2) # Si sex, No season
@@ -631,7 +647,7 @@ confint(m_f2) # FEMALES: OVERLAP 0; WARNINGS
 m_m2 <- lmer(cov_build ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov2_m)
 summary(m_m2)
-confint(m_m2) # MALES: NO OVERLAP 0; WARNINGS
+confint(m_m2) # MALES: sLIGHT OVERLAP 0; WARNINGS
 
 #Try with nlme to see if the warning is fixed
 library(nlme)
@@ -653,31 +669,29 @@ intervals(mm1, level = 0.95) # Doesnt work
 m2 <- lmer(closest2 ~ PC + forest_1 + bear_1 + Sex + 
              Season + PC*Sex + (1|ID_pair), data = prov2) # Sex, With interaction, season
 summary(m2)
-confint(m2) # OVERLAP 0
+confint(m2) 
 
 m3 <- lmer(closest2 ~ PC + forest_1 + bear_1 + Sex + 
              Season + (1|ID_pair), data = prov2) #Without interaction
 summary(m3)
-confint(m3) # OVERLAP 0, WARNING
+confint(m3) 
 
 AIC(m2,m3) # Better without
 
 m4 <- lmer(closest2 ~ PC + forest_1 + bear_1 + Sex
            + (1|ID_pair), data = prov2) # Si sex, No season
 summary(m4)
-confint(m4) # OVERLAP 0, WARNING
+confint(m4) 
 
 m5 <- lmer(closest2 ~ PC + forest_1 + bear_1 +
              Season + (1|ID_pair), data = prov2) # No sex, Si season
 summary(m5)
-confint(m5) # OVERLAP 0, WARNING
+confint(m5) 
 
 m6 <- lmer(closest2 ~ PC + forest_1 + bear_1
            + (1|ID_pair), data = prov2) #No season no sex
 
-AIC(m3, m4, m5, m6) # Same with and without season (m5 and m6)
-summary(m6)
-confint(m6) # OVERLAP 0, WARNING
+AIC(m3, m4, m5, m6) # bEST M5 WITHOUT SEX
 
 
 # BY SEX
@@ -689,9 +703,6 @@ m_f2 <- lmer(closest2 ~ PC + forest_1 + bear_1 +
 summary(m_f2)
 confint(m_f2) # FEMALES: WARNINGS, OVERLAP
 
-m_f3 <- lmer(closest2 ~ PC + forest_1 + bear_1 + (1|ID_pair), data = prov2_f) # NO SEASON
-summary(m_f3)
-confint(m_f3) # FEMALES: WARNINGS, OVERLAP 
 
 #Males
 
@@ -700,34 +711,22 @@ m_m2 <- lmer(closest2 ~ PC + forest_1 + bear_1 +
 summary(m_m2)
 confint(m_m2) # MALES: NO OVERLAP; WARNING
 
-m_m3 <- lmer(closest2 ~ PC + forest_1 + bear_1 + (1|ID_pair), data = prov2_m) # NO SEASON
-summary(m_m3)
-confint(m_m3) # MALES: NO OVERLAP; WARNING
 
-#Try with nlme to see if the warning is fixed
+#Try with nlme to see if the warning is fixed: FIXED
 
 #Females
 
-fm1 <- lme(closest2 ~ PC + forest_1 + bear_1 + Season, # SI SEASON
+fm1 <- lme(closest2 ~ PC + forest_1 + bear_1 + Season, 
            random = ~ 1|ID_pair, data = prov2_f)
 summary(fm1)
-intervals(fm1, level = 0.95) # Doesnt work
+intervals(fm1, level = 0.95) 
 
-fm2 <- lme(closest2 ~ PC + forest_1 + bear_1,# NO SEASON 
-           random = ~ 1|ID_pair, data = prov2_f)
-summary(fm2)
-intervals(fm2, level = 0.95)  # Doesnt work
 
 #Males 
-mm1 <- lme(closest2 ~ PC + forest_1 + bear_1 + Season, # SI SEASON
+mm1 <- lme(closest2 ~ PC + forest_1 + bear_1 + Season, 
            random = ~ 1|ID_pair, data = prov2_m)
 summary(mm1)
-intervals(mm1, level = 0.95) # NO OVERLAP 0, NO WARNINGS!!
-
-mm2 <- lme(closest2 ~ PC + forest_1 + bear_1,# NO SEASON 
-           random = ~ 1|ID_pair, data = prov2_m)
-summary(mm2)
-intervals(mm2, level = 0.95)  # Doesnt work
+intervals(mm1, level = 0.95) # VERY SLIGHT OVERLAP 0, NO WARNINGS
 
 
       # ---- 4. RESPONSE: SEC ROADS COEFFICIENT ----
@@ -743,7 +742,7 @@ m3 <- lmer(X2nd25m ~ PC + forest_1 + bear_1 + Sex +
 summary(m3)
 confint(m3) 
 
-AIC(m2,m3) 
+AIC(m2,m3) # Best m3
 
 m4 <- lmer(X2nd25m ~ PC + forest_1 + bear_1 + Sex
            + (1|ID_pair), data = prov2) # Si sex, No season
@@ -760,7 +759,7 @@ m6 <- lmer(X2nd25m ~ PC + forest_1 + bear_1
 summary(m6)
 confint(m6) 
 
-AIC(m3, m4, m5, m6) 
+AIC(m3, m4, m5, m6) # Best m4 (m6 doesnt converge)
 
 
 ### BY SEX
@@ -774,14 +773,14 @@ confint(m_f2) # FEMALES: SLIGHT OVERLAP 0; WARNING
 m_m2 <- lmer(X2nd25m ~ PC + forest_1 + bear_1 + 
                Season + (1|ID_pair), data = prov2_m)
 summary(m_m2)
-confint(m_m2) # MALES: NO OVERLAP; WARNINGS
+confint(m_m2) # MALES: OVERLAP; WARNINGS
 
-#Try with nlme to see if the warning is fixed
+#Try with nlme to see if the warning is fixed: NOT FIXED
 
 fm1 <- lme(X2nd25m ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov2_f)
 summary(fm1)
-intervals(fm1, level = 0.95) # FEMALES: SLIGHT OVERLAP 0; NO WARNINGS
+intervals(fm1, level = 0.95) # FEMALES: Doesnt work
 
 mm1 <- lme(X2nd25m ~ PC + forest_1 + bear_1 + Season,
            random = ~ 1|ID_pair, data = prov2_m)

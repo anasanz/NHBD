@@ -3,6 +3,38 @@
 rm(list=ls())
 library(dplyr) 
 
+# ---- 0. Fix territory names (only need to be done once I think) ----
+
+setwd("~/Norway/NHBD_humans/Antonio")
+d <- read.csv("covariates_Antonio.csv")
+unique(d$territory)
+d$territory <- as.character(d$territory)
+d$territory[which(d$territory == "Forshyttan_2005s")] <- "Forshyttan_2005_s"
+d$territory[which(d$territory == "Jangen_2004w")] <- "Jangen_2004_w"
+d$territory[which(d$territory == "Kloten_2008w")] <- "Kloten_2008_w"
+d$territory[which(d$territory == "Kloten_2010w")] <- "Kloten_2010_w"
+d$territory[which(d$territory == "Kukumaki_2014s")] <- "Kukumaki_2014_s"
+d$territory[which(d$territory == "Nyskoga_2003s")] <- "Nyskoga_2003_s"
+d$territory[which(d$territory == "Nyskoga_2004w")] <- "Nyskoga_2004_w"
+d$territory[which(d$territory == "Riala_2010w")] <- "Riala_2010_w"
+d$territory[which(d$territory == "Stadra_2003w")] <- "Stadra_2003_w"
+d$territory[which(d$territory == "Tandsjon_2014s")] <- "Tandsjon_2014_s"
+d$territory[which(d$territory == "Tandsjon_2014w")] <- "Tandsjon_2014_w"
+d$territory[which(d$territory == "Tenskog_2010w")] <- "Tenskog_2010_w"
+d$territory[which(d$territory == "Ulriksberg_2006w")] <- "Ulriksberg_2006_w"
+d$territory[which(d$territory == "Kukumaki_2014w")] <- "Kukumaki_2014_w"
+d$territory[which(d$territory == "Bograngen_2003s")] <- "Bograngen_2003_s"
+d$territory[which(d$territory == "Fulufjallet_2009w")] <- "Fulufjallet_2009_w"
+d$territory[which(d$territory == "Glaskogen_2002s1")] <- "Glaskogen_2002_s1"
+d$territory[which(d$territory == "Glaskogen_2002s2")] <- "Glaskogen_2002_s2"
+d$territory[which(d$territory == "Glaskogen_2002s3")] <- "Glaskogen_2002_s3"
+d$territory[which(d$territory == "Kukumaki_2015w")] <- "Kukumaki_2015_w"
+d$territory[which(d$territory == "Kukumaki_2015s")] <- "Kukumaki_2015_s"
+
+
+write.csv(d,"covariates_Antonio.csv")
+
+
 # ---- 1. Repeating model Antonio ----
 
 # This model varies from the previous one in:
@@ -19,6 +51,7 @@ d <- read.csv("covariates_Antonio.csv")
 
 d <- d[ , which(colnames(d) %in% c("territory", "used", "forest_pro", "clip_dem",
                                    "tri5", "main25m", "X2nd25m", "cov_build"))]
+# FIRST: RUN THIS TO FIX TERRITORY NAMES
 
 # Scale by territory
 terr <- unique(d$territory) 
@@ -193,13 +226,6 @@ m$territory <- rownames(m)
 
 #Seems like Tandsjon_2012_s is the one that doesnt converge with closest variable (all converge with closest2)
 
-d_used <- d[which(d$used == 1), ]
-tapply(d_used$territory, d_used$territory, length)
-tapply(d_used$tri5, d_used$territory, mean)
-
-
-
-
 t <- d[which(d$territory == "Tandsjon_2012_s"), ]
 t_random <- t[which(t$used == 0), ]
 t_used <- t[which(t$used == 1), ]
@@ -208,21 +234,13 @@ m_tand <- glm(used ~ forest_pro + tri5 + clip_dem + main25m + X2nd25m + cov_buil
     family = binomial (link = "logit"),
     data = t)
 
-# The problem is the closest variable indeed
+d_used <- d[which(d$used == 1), ]
+tapply(d_used$territory, d_used$territory, length) # There are territories with very few positions, thats why Tandsjon doesnt converge
+# We will remove the territories with less of 250 positions from the next analyses (in script H3)
 
-length(t_random$closest)
-unique(t_random$closest)
-hist(t_random$closest)
-unique(t_used$closest)
-hist(t_used$closest)
-
-unique(t_random$main25m)
-hist(t_random$main25m)
-unique(t_used$main25m)
-hist(t_used$main25m)
 
 setwd("~/Norway/NHBD_humans")
-#write.csv(m,"coef_human.csv")
+write.csv(m,"coef_human.csv")
 
 
     # ----- 3.2. The variable "closest2" is distance to closest human feature including only main roads and buildings ----
