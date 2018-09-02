@@ -10,6 +10,8 @@ library(lme4)
 
 #setwd("~/Norway/NHBD_humans/Antonio")
 #setwd("~/Norway/NHBD_humans")
+setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/natal_habitat_biased_dispersal/nhbd/NHBD/temp/ASP/NHBD_Humans/Data")
+
 setwd("C:/My_documents/ana/nhbd/NHBD/temp/ASP/NHBD_Humans/Data")
 c <- read.csv("coef_human.csv", sep = ",")
 c <- c[ ,-c(1)]
