@@ -95,51 +95,71 @@ writeRaster(tri5, "tri5", format = "GTiff") # Saved in folder Analysis
 
 
 
-#  ---- 2. COORDINATES ----
+# ====  III. COORDINATES ====
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 
 # setwd("~/Norway/NHBD_humans")
 d <- read.csv("all_points.csv", header = TRUE)
 coord <- d[ ,c("x_UTM","y_UTM")] # Coordinates used and random
 
+d_kern <- read.csv("all_points.kern.csv", header = TRUE)
+coord <- d_kern[ ,c("x_UTM","y_UTM")] # Coordinates used and random
 
 
-#  ---- 3. EXTRACT ----
+# ====  IV EXTRACT ----
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/gis")
 # setwd("~/Norway/NHBD_humans/GIS/Analysis")
 
 # Load layers
+## VEGETATION
 humanlands <- raster("humland_pro.tif")
 agri <- raster("agri_pro.tif")
-# plot(agri)
 forest <- raster("forest_pro.tif")
 mires <- raster("mires_pro.tif")
 water <- raster("water_pro.tif")
 mountains <- raster("mountains_pro.tif")
 stack_veg <- stack(humanlands, agri, forest, mires, water, mountains, RAT=TRUE)
 
+## ELEVATION
 tri <- raster("tri5.tif")
 dem <- raster('clip_dem.tif')
 stack_dem <- stack (tri,dem)
 
-
+## ROADS
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/gis/roads")
-
 main <- raster("main25m.tif")
 sec <- raster("2nd25m.tif")
 stack_roads <- stack(main, sec)
 
+# CLOSEST HUMAN THING
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/gis/buildings")
 build <- raster("dist_build25.tif")
 
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/gis/")
+# closest distance to main roads/2nd roads/buildings
+# done in arcmap with cells statitics tool.
+# min value from raster main roads/2nd roads and buildings
 closestcosa <- raster("closestcosa.tif")
+
+
+# closest distance to main roads/buildings
+# done in arcmap with cells statitics tool.
+# min value from raster main roads and buildings
 closestcosita <- raster("d_rd_build.tif")
 
+# plot(forest)
+# d<-d[d$territory_=="Grafjell_2003_w",]
+# points(d[d$territory_=="Grafjell_2003_w","y_UTM"]~d[d$territory_=="Grafjell_2003_w","x_UTM"],pch=16)
+# coord <- d[ ,c("x_UTM","y_UTM")] # Coordinates used and random
 
 # Extract values
 cells <- cellFromXY(stack_veg, coord) # 1. Tells the number of the cells where the coord. fall
 cov_veg <- stack_veg[cells]           # 2. Returns the value of those cells in the stack
+# na <- d[which(is.na(cov_veg[,1])),]
+# 
+# plot(na[na$territory_=="Grafjell_2003_w","y_UTM"]~na[na$territory_=="Grafjell_2003_w","x_UTM"],pch=16)
+# plot(forest,add=T)
+
 
 cells <- cellFromXY(stack_dem, coord) 
 cov_dem <- stack_dem[cells]  
@@ -162,7 +182,9 @@ df <- data.frame(d, cov_veg, cov_dem, cov_roads, cov_build, closest, closest2) #
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 write.csv (df, "covariates_Antonio.csv")
 
-
+#Kernel
+setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
+write.csv (df, "covariates_Antonio_kern.csv")
 
 
 

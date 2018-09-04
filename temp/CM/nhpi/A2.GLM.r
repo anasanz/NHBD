@@ -1,5 +1,4 @@
 
-
 rm(list=ls())
 library(dplyr) 
 
@@ -8,33 +7,35 @@ library(dplyr)
 #setwd("~/Norway/NHBD_humans/Antonio")
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 
-d <- read.csv("covariates_Antonio.csv")
-unique(d$territory)
-d$territory <- as.character(d$territory)
-d$territory[which(d$territory == "Forshyttan_2005s")] <- "Forshyttan_2005_s"
-d$territory[which(d$territory == "Jangen_2004w")] <- "Jangen_2004_w"
-d$territory[which(d$territory == "Kloten_2008w")] <- "Kloten_2008_w"
-d$territory[which(d$territory == "Kloten_2010w")] <- "Kloten_2010_w"
-d$territory[which(d$territory == "Kukumaki_2014s")] <- "Kukumaki_2014_s"
-d$territory[which(d$territory == "Nyskoga_2003s")] <- "Nyskoga_2003_s"
-d$territory[which(d$territory == "Nyskoga_2004w")] <- "Nyskoga_2004_w"
-d$territory[which(d$territory == "Riala_2010w")] <- "Riala_2010_w"
-d$territory[which(d$territory == "Stadra_2003w")] <- "Stadra_2003_w"
-d$territory[which(d$territory == "Tandsjon_2014s")] <- "Tandsjon_2014_s"
-d$territory[which(d$territory == "Tandsjon_2014w")] <- "Tandsjon_2014_w"
-d$territory[which(d$territory == "Tenskog_2010w")] <- "Tenskog_2010_w"
-d$territory[which(d$territory == "Ulriksberg_2006w")] <- "Ulriksberg_2006_w"
-d$territory[which(d$territory == "Kukumaki_2014w")] <- "Kukumaki_2014_w"
-d$territory[which(d$territory == "Bograngen_2003s")] <- "Bograngen_2003_s"
-d$territory[which(d$territory == "Fulufjallet_2009w")] <- "Fulufjallet_2009_w"
-d$territory[which(d$territory == "Glaskogen_2002s1")] <- "Glaskogen_2002_s1"
-d$territory[which(d$territory == "Glaskogen_2002s2")] <- "Glaskogen_2002_s2"
-d$territory[which(d$territory == "Glaskogen_2002s3")] <- "Glaskogen_2002_s3"
-d$territory[which(d$territory == "Kukumaki_2015w")] <- "Kukumaki_2015_w"
-d$territory[which(d$territory == "Kukumaki_2015s")] <- "Kukumaki_2015_s"
+d1 <- read.csv("covariates_Antonio.csv")
+d1 <- read.csv("covariates_Antonio_kern.csv")
+
+unique(d1$territory)
+d1$territory <- as.character(d1$territory)
+d1$territory[which(d1$territory == "Forshyttan_2005s")] <- "Forshyttan_2005_s"
+d1$territory[which(d1$territory == "Jangen_2004w")] <- "Jangen_2004_w"
+d1$territory[which(d1$territory == "Kloten_2008w")] <- "Kloten_2008_w"
+d1$territory[which(d1$territory == "Kloten_2010w")] <- "Kloten_2010_w"
+d1$territory[which(d1$territory == "Kukumaki_2014s")] <- "Kukumaki_2014_s"
+d1$territory[which(d1$territory == "Nyskoga_2003s")] <- "Nyskoga_2003_s"
+d1$territory[which(d1$territory == "Nyskoga_2004w")] <- "Nyskoga_2004_w"
+d1$territory[which(d1$territory == "Riala_2010w")] <- "Riala_2010_w"
+d1$territory[which(d1$territory == "Stadra_2003w")] <- "Stadra_2003_w"
+d1$territory[which(d1$territory == "Tandsjon_2014s")] <- "Tandsjon_2014_s"
+d1$territory[which(d1$territory == "Tandsjon_2014w")] <- "Tandsjon_2014_w"
+d1$territory[which(d1$territory == "Tenskog_2010w")] <- "Tenskog_2010_w"
+d1$territory[which(d1$territory == "Ulriksberg_2006w")] <- "Ulriksberg_2006_w"
+d1$territory[which(d1$territory == "Kukumaki_2014w")] <- "Kukumaki_2014_w"
+d1$territory[which(d1$territory == "Bograngen_2003s")] <- "Bograngen_2003_s"
+d1$territory[which(d1$territory == "Fulufjallet_2009w")] <- "Fulufjallet_2009_w"
+d1$territory[which(d1$territory == "Glaskogen_2002s1")] <- "Glaskogen_2002_s1"
+d1$territory[which(d1$territory == "Glaskogen_2002s2")] <- "Glaskogen_2002_s2"
+d1$territory[which(d1$territory == "Glaskogen_2002s3")] <- "Glaskogen_2002_s3"
+d1$territory[which(d1$territory == "Kukumaki_2015w")] <- "Kukumaki_2015_w"
+d1$territory[which(d1$territory == "Kukumaki_2015s")] <- "Kukumaki_2015_s"
 
 
-write.csv(d,"covariates_Antonio.csv")
+#write.csv(d,"covariates_Antonio.csv")
 
 
 # ---- 1. Repeating model Antonio ----
@@ -49,10 +50,24 @@ write.csv(d,"covariates_Antonio.csv")
 #               -> Remove agriculture (territories sympatric dont have agriculture)
 
 #setwd("~/Norway/NHBD_humans/Antonio")
-d <- read.csv("covariates_Antonio.csv")
+# setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
+# d <- read.csv("covariates_Antonio.csv")
+d1[is.na(d1)] <- 0
+d2 <- d1[ , which(colnames(d1) %in% c("forest_pro", "clip_dem","mires_pro","clip_dem",
+                                   "tri5", "main25m", "X2nd25m", "cov_build","closest","closest2"))]
+cor(d2)
+#forest_pro vs mires_pro == -0.64
+#X2nd25m vs closest == 0.8302396
+#closest2 vs cov_build ==0.86309757
 
-d <- d[ , which(colnames(d) %in% c("territory", "used", "forest_pro", "clip_dem",
-                                   "tri5", "main25m", "X2nd25m", "cov_build"))]
+#remove mires 
+#use closest2 so remove cov-build
+# d <- d[ , which(colnames(d) %in% c("territory", "used", "forest_pro", "clip_dem",
+#                                    "tri5", "main25m", "X2nd25m", "cov_build"))]
+# ---- 1.1 Repeating model Antonio closest 2 ----
+
+d <- d1[ , which(colnames(d1) %in% c("territory", "used", "forest_pro", "clip_dem",
+                                   "tri5", "main25m", "X2nd25m","closest2"))]
 # FIRST: RUN THIS TO FIX TERRITORY NAMES
 
 # Scale by territory
@@ -68,11 +83,11 @@ IDD <- unique(d$territory)
 
 m <- matrix(NA, ncol=8, nrow=length(unique(d$territory)))
 m <-data.frame(m)
-colnames(m) <- c("territory","(Intercept)", "forest_pro","tri5", 
-                 "clip_dem", "main25m", "X2nd25m", "cov_build")
+colnames(m) <- c("territory","(Intercept)", "forest_pro", "clip_dem",
+                 "tri5", "main25m", "X2nd25m","closest2")
 rownames(m) <- IDD
 
-glm.list <-list()
+glm.list <- list()
 
 for(i in 1:length(IDD)){
   data1 <- d[d$territory==IDD[i],] # Select one territory
@@ -95,17 +110,93 @@ m[i, as.character(rownames(glm.list.coef))] <- glm.list[[i]]$coefficients
 
 m$territory <- rownames(m)
 
+## CHECK AND SUBSET TERRITORIES 
+# t <- d[which(d$territory == "Tandsjon_2012_s"), ]
+# t_random <- t[which(t$used == 0), ]
+# t_used <- t[which(t$used == 1), ]
+# 
+# m_tand <- glm(used ~ forest_pro + tri5 + clip_dem + main25m + X2nd25m  + closest2,
+#               family = binomial (link = "logit"),
+#               data = t)
+# 
+d_used <- d[which(d$used == 1), ]
+tapply(d_used$territory, d_used$territory, length) # There are territories with very few positions, thats why Tandsjon doesnt converge
+# We will remove the territories with less of 250 positions from the next analyses (in script H3)
+
 # setwd("~/Norway/NHBD_humans/Antonio")
- write.csv(m,"coef_Antonio_new.csv")
+write.csv(m,"coef_Antonio_new_closest2.csv")
+write.csv(m,"coef_Antonio_new_closest2_kern.csv")
 
-
+ # ---- 1.2 Repeating model Antonio closest  ----
+## closest 1  
+ d <- d1[ , which(colnames(d1) %in% c("territory", "used", "forest_pro", "clip_dem",
+                                      "tri5", "main25m", "closest","cov_build"))]
+ # FIRST: RUN THIS TO FIX TERRITORY NAMES
+ 
+ # Scale by territory
+ terr <- unique(d$territory) 
+ 
+ for(i in 1:length(terr)){
+   d[d$territory==terr[i],c(2:7)] <- scale(d[d$territory==terr[i],c(2:7)])
+ }
+ 
+ # Run one model for each territory
+ 
+ IDD <- unique(d$territory)
+ 
+ m <- matrix(NA, ncol=8, nrow=length(unique(d$territory)))
+ m <-data.frame(m)
+ colnames(m) <- c("territory","(Intercept)", "forest_pro", "clip_dem",
+                  "tri5", "main25m", "cov_build","closest")
+ rownames(m) <- IDD
+ 
+ glm.list <- list()
+ 
+ for(i in 1:length(IDD)){
+   data1 <- d[d$territory==IDD[i],] # Select one territory
+   used <- data1$used
+   data1 <- data1[,2:7] # Select only variables to put in the model
+   variables <- apply(data1, 2, function(x) sum(is.na(x))==length(x) ) # Select variables without NA (FALSE) in the territory
+   variablestrue <- names(variables[variables==FALSE]) # Names variables without NA in the territory
+   df <- data1[,variables!=TRUE] # Data frame variables without NA
+   
+   form <-as.formula(paste("used ~ ", paste(variablestrue, collapse= "+"))) # Create formula with variables without NA
+   
+   glm.list[[i]] <- glm (form, # Run model
+                         family = binomial (link = "logit"),
+                         data =df )
+   
+   glm.list.coef <- as.data.frame(glm.list[[i]]$coefficients) # Store it
+   m[i, as.character(rownames(glm.list.coef))] <- glm.list[[i]]$coefficients
+   
+ } 
+ 
+ m$territory <- rownames(m)
+ 
+ ## CHECK AND SUBSET TERRITORIES 
+ # t <- d[which(d$territory == "Tandsjon_2012_s"), ]
+ # t_random <- t[which(t$used == 0), ]
+ # t_used <- t[which(t$used == 1), ]
+ # 
+ # m_tand <- glm(used ~ forest_pro + tri5 + clip_dem + main25m + X2nd25m  + closest2,
+ #               family = binomial (link = "logit"),
+ #               data = t)
+ # 
+ d_used <- d[which(d$used == 1), ]
+ tapply(d_used$territory, d_used$territory, length) # There are territories with very few positions, thats why Tandsjon doesnt converge
+ # We will remove the territories with less of 250 positions from the next analyses (in script H3)
+ 
+ # setwd("~/Norway/NHBD_humans/Antonio")
+ write.csv(m,"coef_Antonio_new_closest.csv")
+ write.csv(m,"coef_Antonio_new_closest_kern.csv")
+ 
+ 
 
 # ---- 2. PCA ----
-
 library(factoextra)
 
 # setwd("~/Norway/NHBD_humans/Antonio")
- coef <- read.csv("coef_Antonio_new.csv", sep = ",")
+ coef <- read.csv("coef_Antonio_new_closest2.csv", sep = ",")
 
 coef <- coef[ ,-c(1)] 
 
