@@ -9,6 +9,8 @@ setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 
 d1 <- read.csv("covariates_Antonio.csv")
 d1 <- read.csv("covariates_Antonio_kern.csv")
+d1 <- read.csv("covariates_Antonio.mcp.csv")
+
 
 unique(d1$territory)
 d1$territory <- as.character(d1$territory)
@@ -74,7 +76,7 @@ d <- d1[ , which(colnames(d1) %in% c("territory", "used", "forest_pro", "clip_de
 terr <- unique(d$territory) 
 
 for(i in 1:length(terr)){
-    d[d$territory==terr[i],c(2:7)] <- scale(d[d$territory==terr[i],c(2:7)])
+    d[d$territory==terr[i],c(3:8)] <- scale(d[d$territory==terr[i],c(3:8)])
 }
 
 # Run one model for each territory
@@ -92,12 +94,12 @@ glm.list <- list()
 for(i in 1:length(IDD)){
   data1 <- d[d$territory==IDD[i],] # Select one territory
   used <- data1$used
-  data1 <- data1[,2:7] # Select only variables to put in the model
+  data1 <- data1[,3:8] # Select only variables to put in the model
 variables <- apply(data1, 2, function(x) sum(is.na(x))==length(x) ) # Select variables without NA (FALSE) in the territory
 variablestrue <- names(variables[variables==FALSE]) # Names variables without NA in the territory
 df <- data1[,variables!=TRUE] # Data frame variables without NA
 
-form <-as.formula(paste("used ~ ", paste(variablestrue, collapse= "+"))) # Create formula with variables without NA
+form <- as.formula(paste("used ~ ", paste(variablestrue, collapse= "+"))) # Create formula with variables without NA
 
 glm.list[[i]] <- glm (form, # Run model
      family = binomial (link = "logit"),
@@ -126,6 +128,8 @@ tapply(d_used$territory, d_used$territory, length) # There are territories with 
 # setwd("~/Norway/NHBD_humans/Antonio")
 write.csv(m,"coef_Antonio_new_closest2.csv")
 write.csv(m,"coef_Antonio_new_closest2_kern.csv")
+
+write.csv(m,"coef_Antonio_new_closest2_mcp.csv")
 
  # ---- 1.2 Repeating model Antonio closest  ----
 ## closest 1  

@@ -14,6 +14,8 @@ setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 
 #setwd("C:/My_documents/ana/nhbd/NHBD/temp/ASP/NHBD_Humans/Data")
 c <- read.csv("coef_Antonio_new_closest2.csv", sep = ",")
+c <- read.csv("coef_Antonio_new_closest2_mcp.csv", sep = ",")
+
  # c <- read.csv("coef_Antonio_new_closest2_kern.csv", sep = ",")
 
 #c <- read.csv("coef_Antonio_new_closest.csv", sep = ",")
@@ -108,13 +110,16 @@ natal[which(natal$PC2 < -4), ] # Stadra
 
 # III. ---- Link with coefficients ----
 #setwd("~/Norway/NHBD_humans/Antonio")
+setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
+
 d <- read.csv("covariates_Antonio.csv")
+d <- read.csv("covariates_Antonio.mcp.csv")
 
 d_used <- d[which(d$used == 1), ] # Select used (gps positions)
 tapply(d_used$territory, d_used$territory, length) # nº positions/territory
 
 positions <- as.data.frame(tapply(d_used$territory, d_used$territory, length)) # Data frame with nº of positions/territory
-remove <- rownames(positions)[which(positions$`tapply(d_used$territory, d_used$territory, length)` < 250)] # Remove the ones < 250
+remove <- rownames(positions)[which(positions$`tapply(d_used$territory, d_used$territory, length)` < 50)] # Remove the ones < 250
 
 # 1. ----- Dataset with "closest" variable ----
 #setwd("~/Norway/NHBD_humans")
@@ -124,8 +129,10 @@ e <- left_join(natal,c, by = "Territory_antonio")
 e$Season <- 0 # Add season (Summer/Winter = 1/0)
 e$Season[grep("_s", e$Territory_antonio, ignore.case = TRUE)] <- 1
 
-# prov <- e[-which(e$Territory_antonio %in% remove), ] # Remove territories with < 250 positions to estimate selection coefficients
-prov <- e # Remove territories with < 250 positions to estimate selection coefficients
+prov <- e[-which(e$closest2 >1), ] # Remove territories with < 250 positions to estimate selection coefficients
+
+#prov <- e[-which(e$Territory_antonio %in% remove), ] # Remove territories with < 250 positions to estimate selection coefficients
+ #prov <- e # Remove territories with < 250 positions to estimate selection coefficients
 
 ## Make one dataset for each sex for analyses
 prov_f <- prov[which(prov$Sex == "F"), ]
@@ -140,7 +147,7 @@ prov_w <- prov[which(prov$Season == 0), ]
 
 # I.A CLOSEST 2 ----
 # ----   1.1 ALL SEXES ----
-plot(prov$closest2~ prov$PC, pch = 16) # Overall trend not significant for all sexes together
+plot(prov$closest2~ prov$PC, pch = 16, ylim=c(-1,1)) # Overall trend not significant for all sexes together
 abline(lm(prov$main25m ~ prov$PC)) 
 summary(lm(prov$main25m ~ prov$PC))
 
@@ -157,13 +164,13 @@ legend("topright", fill=c("blue","red"), legend = c("winter","summer"))
 
 
 # ----   1.2 FEMALE ----
-plot(prov_f$closest2~ prov_f$PC, pch = 16) # Overall trend not significant for all sexes together
+plot(prov_f$closest2~ prov_f$PC, pch = 16, ylim=c(-1,1)) # Overall trend not significant for all sexes together
 abline(lm(prov_f$closest2 ~ prov_f$PC)) 
 summary(lm(prov_f$closest2 ~ prov_f$PC))
 
 # JUST CHECK SEASON
 col_season <- c("blue","red")[as.factor(prov$Season)]
-plot(prov_f$PC,prov_f$closest2, pch = 16, col = col_season, xlab = "PC1", ylab="Beta main roads")
+plot(prov_f$PC,prov_f$closest2, pch = 16, col = col_season, xlab = "PC1", ylab="Beta main roads", ylim=c(-1,1))
 
 prov_s_F <- prov[which(prov_f$Season == 1), ] # Create 1 dataset for each season
 prov_w_F <- prov[which(prov_f$Season == 0), ]
@@ -171,7 +178,7 @@ prov_w_F <- prov[which(prov_f$Season == 0), ]
 abline(lm(prov_s_F$closest2 ~ prov_s_F$PC), col = "red") #Summer
 summary(lm(prov_s_F$closest2 ~ prov_s_F$PC))
 
-plot(prov_w_F$PC,prov_w_F$closest2, pch = 16, xlab = "PC1", ylab="Beta closest", main="Female")
+plot(prov_w_F$PC,prov_w_F$closest2, pch = 16, xlab = "PC1", ylab="Beta closest", main="Female", ylim=c(-1,1))
 abline(lm(prov_w_F$closest2 ~ prov_w_F$PC), col = "black") #Winter
 summary(lm(prov_w_F$closest2 ~ prov_w_F$PC))
 # legend("topright", fill=c("blue","red"), legend = c("winter","summer"))

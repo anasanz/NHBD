@@ -14,6 +14,7 @@ d <- read.csv("FINAL_dataset_v2_season+numeric.csv", header = TRUE, sep = ";")
 scand <- readOGR("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/Scandinavia_border_33N.shp")
 ID <- unique(d$territory_)
 
+
 # ==== II. DEFINE AVAILABILITY ====
 # ---- 1. ANTONIO DEFINTION OF AVAILABILITY ----
 # pdf(file="MCP.pdf")
@@ -38,6 +39,8 @@ for (i in 1:length(ID)){
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 d <- read.csv("FINAL_dataset_v2_season+numeric.csv", header = TRUE, sep = ";")
 c <- d[which(d$id != "random"), which(colnames(d) %in% c("territory_", "x_UTM", "y_UTM")) ] #USED GPS positions only
+
+
 coordinates(c) <- cbind(c$x_UTM,c$y_UTM)
 proj4string(c) <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0" # As SpatialPointsDataFrame
 
@@ -45,6 +48,8 @@ proj4string(c) <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +ellps=WGS8
 mcp_100 <- mcp(c[,1], percent = 100) # Create MCP for each territory
 plot(mcp_100,col = mcp_100$id)
 plot(mcp_100[1, ])
+
+
 
 # ---- 2.1 CREATE RANDOM POINTS ----
 
@@ -73,11 +78,41 @@ df$used <- 0 # Used 0: Random
 
 # ---- 2.2. JOIN RANDOM AND GPS LOCATIONS ----
 d <- read.csv("FINAL_dataset_v2_season+numeric.csv", header = TRUE, sep = ";")
-c <- d[which(d$id != "random"), which(colnames(d) %in% c("territory_", "x_UTM", "y_UTM")) ]
+c <- d[which(d$id != "random"), which(colnames(d) %in% c("territory_", "x_UTM", "y_UTM","id")) ]
 c$Used <- 1 # Used 1: GPS points
 colnames(c) <- colnames(df)
 
-data <- rbind(c,df) # Join
+### KEEP ONLY THE MOVING GPS LOCATIONS 
+### update the time 
+## upload a file to get the time
+dtime <- read.csv("dataset_09022018_territories_fixed.csv", header = TRUE, sep = ",")
+# convert to date_time
+date_time <- paste(dtime$date, dtime$time, sep=" ")
+dtime$date_time <- as.POSIXct(strptime(date_time, "%d/%m/%Y %H:%M"),tz="GMT")
+
+#Link the two files with this id 
+dtime$id <- as.character(dtime$id)
+c$id <- as.character(c$id)
+
+##GET THE TIME HERE 
+merge <- merge(x =c, y= dtime, by="id")
+c <- merge[,c("territory_", "x_UTM.x", "y_UTM.x","id","date_time","date.x")]
+
+coordinates(c) <- cbind(c$x_UTM,c$y_UTM)
+proj4string(c) <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0" # As SpatialPointsDataFrame
+
+
+### 
+buffer=200 
+ID <- unique(c$territory_)
+
+i=1
+for (i in 1:length(ID)){
+  
+}
+
+
+data <- rbind(c, df) # Join
 
 # PLOT TO CHECK #
 data1 <- data[data$territory=="Fulufjallet_2010_w",]

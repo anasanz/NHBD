@@ -100,6 +100,8 @@ setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 
 # setwd("~/Norway/NHBD_humans")
 d <- read.csv("all_points.csv", header = TRUE)
+d <- read.csv("all_points.move_MCP.csv", header = TRUE)
+
 coord <- d[ ,c("x_UTM","y_UTM")] # Coordinates used and random
 
 d_kern <- read.csv("all_points.kern.csv", header = TRUE)
@@ -180,7 +182,7 @@ df <- data.frame(d, cov_veg, cov_dem, cov_roads, cov_build, closest, closest2) #
 
 #setwd("~/Norway/NHBD_humans/Antonio")
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
-write.csv (df, "covariates_Antonio.csv")
+write.csv (df, "covariates_Antonio.mcp.csv")
 
 #Kernel
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
