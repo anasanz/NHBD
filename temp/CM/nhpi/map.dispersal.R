@@ -52,6 +52,7 @@ male <- hum[,c("Territory_antonio","X_birth_M","Y_birth_M")]
 
 points(male$Y_birth_M ~ male$X_birth_M, pch=16, col="red")
 centroids <- as.data.frame(gCentroid(mcp_100,byid=TRUE))
+
 for(i in 1:nrow(male)){
   centr.id <- which(rownames(centroids)== male$Territory_antonio[i])
   arrows(x0=male$X_birth_M[i], y0= male$Y_birth_M[i],

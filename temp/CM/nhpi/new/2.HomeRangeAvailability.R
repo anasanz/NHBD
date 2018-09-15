@@ -56,7 +56,7 @@ for (i in 1:length(ID)){
   set.seed(i)
   #draw random points
   rdm.mcp.sp <- spsample(mcpid, n.rdm.pts, type="random", iter = 10)
-  set.seed(i+5)#picked a value randomly
+  set.seed(i+25)#picked a value randomly
   rdm.kern.sp <- spsample(kernid, n.rdm.pts, type="random", iter = 10)
   
   plot(mcpid)
@@ -96,7 +96,7 @@ for (i in 1:length(ID)){
   set.seed(i)
   #draw random points
   rdm.mcp.sp <- spsample(mcpid, n.rdm.pts, type="random", iter = 10)
-  set.seed(i+5)#picked a value randomly
+  set.seed(i+25)#picked a value randomly
   rdm.kern.sp <- spsample(kernid, n.rdm.pts, type="random", iter = 10)
   
   plot(mcpid)
@@ -242,7 +242,6 @@ write.csv(data.move.kern, "all_points.move_KERN.csv")
 
 
 
-# ==== V. CREATE A DISPERSAL MAP ==== 
 
 
 
