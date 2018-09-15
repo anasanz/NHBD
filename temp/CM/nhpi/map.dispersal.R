@@ -1,9 +1,9 @@
-
 rm(list=ls())
 library(adehabitatHR)
 library(sp)
 library(rgdal)
 library(rgeos)
+
 # ---- 1. Check data with MCP 90 % ----
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/natal_habitat_biased_dispersal/nhbd/NHBD/temp/ASP/NHBD_Humans/Data")
 d <- read.csv("FINAL_dataset_v2_season+numeric.csv", header = TRUE, sep = ";")

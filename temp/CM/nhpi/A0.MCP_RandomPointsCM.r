@@ -49,6 +49,7 @@ merge <- merge(x =used, y= time, by="id")
 used.sp <- merge[,c("territory_", "x_UTM.x", "y_UTM.x","id","date_time","date.x")]
 
 
+
 ## REMOVE SOME WEIRD DUPLICATES.. SAME TIME SAME COORDINATES. 
 nrow(used.sp)
 length1 <- tapply(used.sp$territory_, used.sp$territory_,length)
@@ -59,6 +60,32 @@ used.sp <- used.sp[!duplicated(paste(used.sp[,c("y_UTM.x")], used.sp[,c("y_UTM.x
 # CREATE SP FILE
 coordinates(used.sp) <- cbind(used.sp$x_UTM, used.sp$y_UTM)
 proj4string(used.sp) <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0" # As SpatialPointsDataFrame
+
+
+
+
+
+date.summary <- matrix(NA, nrow=length(ID), ncol=10)
+## check the time of the predation study
+used.sp$date.x <- as.Date(strptime(used.sp$date.x, "%d/%m/%Y"))
+# d$date <- as.POSIXct(strptime(d$date, "%d/%m/%Y"))
+for (i in 1:length(ID)){
+  fc <- used.sp[which(used.sp$territory_ == ID[i]), ]
+  date.summary[i,1] <- as.character(ID[i])
+  date.summary[i,2] <- as.character(as.Date(min(fc$date.x)))
+  date.summary[i,3] <- as.character(as.Date(max(fc$date.x)))
+  date.summary[i,4] <- as.character(diff(range(fc$date.x)))
+  date.summary[i,5] <- length(fc$date.x)
+  date.summary[i,6] <- as.character(fc$territory_[1])
+  date.summary[i,7] <- NA#ifelse(fc$season[1]==1,"S","W")
+  date.summary[i,8] <- NA#as.character(fc$study_star[1])
+  date.summary[i,9] <- NA#as.character(fc$study_end[1])
+  date.summary[i,10] <- length(fc$territory_)/ as.numeric(diff(range(fc$date.x)))
+  
+}
+
+colnames(date.summary) <- c("Territory_year", "Start", "End","Range","Nblocations", "Territory", "Season","Start", "End","locations per day" )
+write.csv(date.summary,file="summary_GPS.csv")
 
 
 # CREATE MCP 100

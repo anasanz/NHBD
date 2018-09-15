@@ -96,17 +96,18 @@ writeRaster(tri5, "tri5", format = "GTiff") # Saved in folder Analysis
 
 
 # ====  III. COORDINATES ====
-setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
+setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/new")
 
 files <- c("all_points.not.moved_MCP", "all_points.not.moved_KERN",
  "all_points.move_MCP", "all_points.move_KERN")
 
 for(f in 1:length(files)){
 # setwd("~/Norway/NHBD_humans")
+  setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/new")
   
 d <- read.csv(paste(files[f], ".csv", sep=""), header = TRUE)
 
-coord <- d[ ,c("x_UTM","y_UTM")] # Coordinates used and random
+coord <- d[ ,c("X","Y")] # Coordinates used and random
 
 
 # ====  IV EXTRACT ----
@@ -184,5 +185,7 @@ df <- data.frame(d, cov_veg, cov_dem, cov_roads, cov_build, closest, closest2) #
 #setwd("~/Norway/NHBD_humans/Antonio")
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 write.csv (df, paste("covariates_",files[f], ".csv", sep=""))
+
+print(f)
 }
 

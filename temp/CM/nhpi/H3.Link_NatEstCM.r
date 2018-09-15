@@ -15,8 +15,8 @@ setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 #setwd("C:/My_documents/ana/nhbd/NHBD/temp/ASP/NHBD_Humans/Data")
 c <- read.csv("coef_Antonio_new_closest2.csv", sep = ",")
 c <- read.csv("coef_Antonio_new_closest2_mcp.csv", sep = ",")
-
  # c <- read.csv("coef_Antonio_new_closest2_kern.csv", sep = ",")
+c <- read.csv("coef_Antonio_new_closest2_mcpnot.moved.csv", sep = ",")
 
 #c <- read.csv("coef_Antonio_new_closest.csv", sep = ",")
 
