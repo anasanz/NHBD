@@ -30,7 +30,8 @@ Variable <- c("closest2_M","closest_M")
 
 
 
-thresholdNBGPS <- c(250,250,25,25)
+thresholdNBGPS <- c(250,250,50,55)
+# thresholdNBGPS <- c(0,0,0,0)
 
 for(FF in 1:length(files)){
   setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
@@ -219,7 +220,9 @@ tapply(d_used$Study_year, d_used$Study_year, length) # nº positions/territory
 
 positions <- as.data.frame(tapply(d_used$Study_year, d_used$Study_year, length)) # Data frame with nº of positions/territory
 remove <- rownames(positions)[which(positions$`tapply(d_used$Study_year, d_used$Study_year, length)` < thresholdNBGPS[FF])] # Remove the ones < 250
+if(length(remove)>0){
 prov <- prov[-which(prov$Territory_antonio %in% remove),]
+}
 # ---- IV. PLOTS ----
 # ==== 1. MALES ====
 

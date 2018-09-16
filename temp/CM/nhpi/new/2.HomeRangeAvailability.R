@@ -5,7 +5,10 @@ library(rgdal)
 library(raster)
 library(rgeos)
 library(maptools)
-
+library(sf)
+# ====----------------------- ====
+# ==== I. DEFINE AVAILABILITY ====
+# ====----------------------- ====
 # ==== I. LOAD DATA ====
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/new")
 gps <- read.csv("gps.dataCM.csv", header = TRUE)
@@ -28,7 +31,7 @@ plot(mcp_100[1, ])
 # ---- 2. KERNEL 99% ----
 
 # CREATE KERNEL 99
-kern <- kernelUD(gps[,"Study_year"], h = 2206.224)#"href")#4291.715)#"href")#3835)#"href") # use the max "href"
+kern <- kernelUD(gps[,"Study_year"], h ="href")# 2206.224)#"href")#4291.715)#"href")#3835)#"href") # use the max "href"
 kern_99 <- getverticeshr(kern, 99)
 plot(kern_99, col = kern_99$id)
 
@@ -56,7 +59,7 @@ for (i in 1:length(ID)){
   set.seed(i)
   #draw random points
   rdm.mcp.sp <- spsample(mcpid, n.rdm.pts, type="random", iter = 10)
-  set.seed(i+25)#picked a value randomly
+  set.seed(i+3)#picked a value randomly
   rdm.kern.sp <- spsample(kernid, n.rdm.pts, type="random", iter = 10)
   
   plot(mcpid)
@@ -96,7 +99,7 @@ for (i in 1:length(ID)){
   set.seed(i)
   #draw random points
   rdm.mcp.sp <- spsample(mcpid, n.rdm.pts, type="random", iter = 10)
-  set.seed(i+25)#picked a value randomly
+  set.seed(i+3)#picked a value randomly
   rdm.kern.sp <- spsample(kernid, n.rdm.pts, type="random", iter = 10)
   
   plot(mcpid)
@@ -241,8 +244,8 @@ write.csv(data.move.kern, "all_points.move_KERN.csv")
 
 
 
-
-
-
-
+####
+rm(list=ls())
+library(rgdal)
+library(raster)
 

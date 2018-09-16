@@ -165,7 +165,7 @@ gps <- gps[!duplicated(paste(gps[,c("X")], gps[,c("Y")], gps[,c("Date_time")])),
 # ==== 6. IDENTIFY MOVING GPS LOCATIONS  ====
 #buffer size 
 BufferWidth <- 100
-speed <- 500 # (200m per hour)
+speed <- 200#500 # (200m per hour)
 moving_used <- list()
 
 #
