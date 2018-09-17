@@ -815,3 +815,96 @@ while(length(filesList)>0){
   print(paste("loop NR", loop))
 }#loop
 
+#### PROCESS RESULTS 
+
+loop=1
+ mod.names <- c("Null", "Natal_F", "Natal_M+Natal_F","Natal_M","Natal_F * Season",
+  "Natal_M*Natal_F",  "Natal_M * Season")
+ 
+rank.MCP.not.moved.closest  <- rank.MCP.not.moved.closest2 <-   array(NA, c(nrow=100, ncol=length(mod.names),2)) 
+rank.KERN.not.moved.closest2 <- rank.KERN.not.moved.closest <-  array(NA, c(nrow=100, ncol=length(mod.names),2)) 
+rank.MCP.moved.closest  <- rank.MCP.moved.closest2 <-  array(NA, c(nrow=100, ncol=length(mod.names),2)) 
+rank.KERN.moved.closest2 <- rank.KERN.moved.closest <- array(NA, c(nrow=100, ncol=length(mod.names),2)) 
+
+  
+dimnames(rank.KERN.moved.closest2)[[2]] <- dimnames(rank.MCP.not.moved.closest2)[[2]] <- mod.names
+dimnames(rank.MCP.moved.closest)[[2]] <- dimnames(rank.KERN.not.moved.closest)[[2]] <- mod.names
+dimnames(rank.KERN.not.moved.closest2)[[2]] <- dimnames(rank.MCP.moved.closest2)[[2]] <- mod.names
+dimnames(rank.MCP.not.moved.closest)[[2]] <- dimnames(rank.KERN.moved.closest)[[2]] <- mod.names
+
+
+id <- c(1:82,84:100)
+for(loop in id){
+load(paste("PC1_COEFF", loop,".RData",sep="_"))
+load(paste("PC1_AIC", loop,".RData",sep="_"))
+rank.MCP.not.moved.closest[loop,,1] <-   match(mod.names , row.names(AIC_TAB$MCP.not.moved$closest))
+rank.MCP.not.moved.closest2[loop,,1] <-   match(mod.names , row.names(AIC_TAB$MCP.not.moved$closest2))
+rank.KERN.not.moved.closest[loop,,1] <-   match(mod.names ,row.names(AIC_TAB$KERN.not.moved$closest))
+rank.KERN.not.moved.closest2[loop,,1] <-  match(mod.names , row.names(AIC_TAB$KERN.not.moved$closest2))
+
+rank.MCP.moved.closest[loop,,1] <-   match(mod.names , row.names(AIC_TAB$MCP.moved$closest))
+rank.MCP.moved.closest2[loop,,1] <-  match(mod.names , row.names(AIC_TAB$MCP.moved$closest2))
+rank.KERN.moved.closest[loop,,1] <-  match(mod.names , row.names(AIC_TAB$KERN.moved$closest))
+rank.KERN.moved.closest2[loop,,1] <- match(mod.names , row.names(AIC_TAB$KERN.moved$closest2))
+
+
+rank.MCP.not.moved.closest[loop,,2] <-   AIC_TAB$MCP.not.moved$closest[rank.MCP.not.moved.closest[loop,,1] ,4]
+rank.MCP.not.moved.closest2[loop,,2] <-   AIC_TAB$MCP.not.moved$closest[rank.MCP.not.moved.closest2[loop,,1] ,4]
+rank.KERN.not.moved.closest[loop,,2] <-   AIC_TAB$MCP.not.moved$closest[rank.KERN.not.moved.closest[loop,,1] ,4]
+rank.KERN.not.moved.closest2[loop,,2] <-  AIC_TAB$MCP.not.moved$closest[rank.KERN.not.moved.closest2[loop,,1] ,4]
+
+rank.MCP.moved.closest[loop,,2] <-   AIC_TAB$MCP.not.moved$closest[rank.MCP.moved.closest[loop,,1] ,4]
+rank.MCP.moved.closest2[loop,,2] <-  AIC_TAB$MCP.not.moved$closest[rank.MCP.moved.closest2[loop,,1] ,4]
+rank.KERN.moved.closest[loop,,2] <-  AIC_TAB$MCP.not.moved$closest[rank.KERN.moved.closest[loop,,1] ,4]
+rank.KERN.moved.closest2[loop,,2] <- AIC_TAB$MCP.not.moved$closest[rank.KERN.moved.closest2[loop,,1] ,4]
+}
+
+
+#########
+# Calculate the ranking 
+ranking.KERN.moved.closest2 <- ranking.KERN.moved.closest <-  matrix(0, ncol=length(mod.names), nrow=length(mod.names) )
+ranking.MCP.moved.closest2 <- ranking.MCP.moved.closest <-  matrix(0, ncol=length(mod.names), nrow=length(mod.names) )
+
+ranking.KERN.not.moved.closest2 <- ranking.KERN.not.moved.closest<-  matrix(0, ncol=length(mod.names), nrow=length(mod.names) )
+ranking.MCP.not.moved.closest2 <- ranking.MCP.not.moved.closest <-  matrix(0, ncol=length(mod.names), nrow=length(mod.names) )
+
+dimnames(ranking.KERN.moved.closest2)[[1]] <- dimnames(ranking.MCP.not.moved.closest2)[[1]] <- mod.names
+dimnames(ranking.MCP.moved.closest)[[1]] <- dimnames(ranking.KERN.not.moved.closest)[[1]] <- mod.names
+dimnames(ranking.KERN.not.moved.closest2)[[1]] <- dimnames(ranking.MCP.moved.closest2)[[1]] <- mod.names
+dimnames(ranking.MCP.not.moved.closest)[[1]] <- dimnames(ranking.KERN.moved.closest)[[1]] <- mod.names
+
+dimnames(ranking.KERN.moved.closest2)[[2]] <- dimnames(ranking.MCP.not.moved.closest2)[[2]] <- mod.names
+dimnames(ranking.MCP.moved.closest)[[2]] <- dimnames(ranking.KERN.not.moved.closest)[[2]] <- mod.names
+dimnames(ranking.KERN.not.moved.closest2)[[2]] <- dimnames(ranking.MCP.moved.closest2)[[2]] <- mod.names
+dimnames(ranking.MCP.not.moved.closest)[[2]] <- dimnames(ranking.KERN.moved.closest)[[2]] <- mod.names
+
+for(i in 1:length(mod.names)){
+# MOVED
+tb <- table(rank.MCP.moved.closest[,i,1])/sum(table(rank.MCP.moved.closest[,i,1]))
+ranking.MCP.moved.closest[i,as.numeric(names(tb))] <- round(tb,digits=2)
+
+tb <- table(rank.MCP.moved.closest2[,i,1])/sum(table(rank.MCP.moved.closest2[,i,1]))
+ranking.MCP.moved.closest2[i,as.numeric(names(tb))] <- round(tb,digits=2)
+
+tb <- table(rank.KERN.moved.closest[,i,1])/sum(table(rank.KERN.moved.closest[,i,1]))
+ranking.KERN.moved.closest[i,as.numeric(names(tb))] <- round(tb,digits=2)
+
+tb <- table(rank.KERN.moved.closest2[,i,1])/sum(table(rank.KERN.moved.closest2[,i,1]))
+ranking.KERN.moved.closest2[i,as.numeric(names(tb))] <- round(tb,digits=2)
+
+# NOT MOVED
+tb <- table(rank.MCP.not.moved.closest[,i,1])/sum(table(rank.MCP.not.moved.closest[,i,1]))
+ranking.MCP.not.moved.closest[i,as.numeric(names(tb))] <- round(tb,digits=2)
+
+tb <- table(rank.MCP.not.moved.closest2[,i,1])/sum(table(rank.MCP.not.moved.closest2[,i,1]))
+ranking.MCP.not.moved.closest2[i,as.numeric(names(tb))] <- round(tb,digits=2)
+
+tb <- table(rank.KERN.not.moved.closest[,i,1])/sum(table(rank.KERN.not.moved.closest[,i,1]))
+ranking.KERN.not.moved.closest[i,as.numeric(names(tb))] <- round(tb,digits=2)
+
+tb <- table(rank.KERN.not.moved.closest2[,i,1])/sum(table(rank.KERN.not.moved.closest2[,i,1]))
+ranking.KERN.not.moved.closest2[i,as.numeric(names(tb))] <- round(tb,digits=2)
+}
+
+
+

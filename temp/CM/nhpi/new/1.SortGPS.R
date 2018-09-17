@@ -228,6 +228,8 @@ for (i in 1:length(ID)){
 }
 
 colnames(date.summary) <- c("Territory_year", "Start", "End","Range","Nblocations", "nblocsmoving", "Season","Start", "End" )
+setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/new")
+write.csv(date.summary, file="gps.datasummary.csv")
 
 #  
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/new")
