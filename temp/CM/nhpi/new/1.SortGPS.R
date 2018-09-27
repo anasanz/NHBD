@@ -235,4 +235,3 @@ write.csv(date.summary, file="gps.datasummary.csv")
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/new")
 write.csv(gps, file="gps.dataCM.csv")
 
-gps[which(gps$Study_year == "Glaskogen_2002_S"), ]

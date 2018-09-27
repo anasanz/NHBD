@@ -39,31 +39,6 @@ for(FF in 1:length(files)){
 
 ## modify territory names
 levels(unique(d1$Study_year))
-# d1$territory <- as.character(d1$territory)
-# d1$territory[which(d1$territory == "Forshyttan_2005s")] <- "Forshyttan_2005_s"
-# d1$territory[which(d1$territory == "Kloten_2010w")] <- "Kloten_2010_w"
-# d1$territory[which(d1$territory == "Glaskogen_2002_S")] <- "Glaskogen_2002_s2"
-# d1$territory[which(d1$territory == "Glaskogen_2002_S")] <- "Glaskogen_2002_s3"
-# 
-# d1$territory[which(d1$territory == "Jangen_2004_W")] <- "Jangen_2004_W"
-# d1$territory[which(d1$territory == "Kloten_2008_W")] <- "Kloten_2008_w"
-# d1$territory[which(d1$territory == "Kukumaki_2014_S")] <- "Kukumaki_2014_s"
-# d1$territory[which(d1$territory == "Nyskoga_2003_S")] <- "Nyskoga_2003_s"
-# d1$territory[which(d1$territory == "Nyskoga_2004_W")] <- "Nyskoga_2004_w"
-# d1$territory[which(d1$territory == "Riala_2010_W")] <- "Riala_2010_w"
-# d1$territory[which(d1$territory == "Stadra_2003_W")] <- "Stadra_2003_w"
-# d1$territory[which(d1$territory == "Tandsjon_2014_S")] <- "Tandsjon_2014_s"
-# d1$territory[which(d1$territory == "Tandsjon_2014_W")] <- "Tandsjon_2014_w"
-# d1$territory[which(d1$territory == "Tenskog_2010_W")] <- "Tenskog_2010_w"
-# d1$territory[which(d1$territory == "Ulriksberg_2006_W")] <- "Ulriksberg_2006_w"
-# d1$territory[which(d1$territory == "Kukumaki_2014_W")] <- "Kukumaki_2014_w"
-# d1$territory[which(d1$territory == "Bograngen_2003_S")] <- "Bograngen_2003_s"
-# d1$territory[which(d1$territory == "Fulufjallet_2009_W")] <- "Fulufjallet_2009_w"
-# 
-# d1$territory[which(d1$territory == "Glaskogen_2002_S")] <- "Glaskogen_2002_s1"
-# 
-# d1$territory[which(d1$territory == "Kukumaki_2015w")] <- "Kukumaki_2015_w"
-# d1$territory[which(d1$territory == "Kukumaki_2015s")] <- "Kukumaki_2015_s"
 
 ### ---- 1. SELECT THE VARIABLES FOR THE MODEL ====
 M=1
@@ -115,6 +90,7 @@ for(i in 1:length(IDD)){
 } 
 glm.m <- m
 glm.m$Study_year <- rownames(glm.m)
+write.csv(glm.m, file=paste("GLM", files[FF], Variable[M],".pdf",sep="_"))
 
 ## CHECK AND SUBSET TERRITORIES 
 # t <- d[which(d$territory == "Tandsjon_2012_s"), ]
@@ -352,7 +328,7 @@ dev.off()
 
 # RUN MODELS 
 mods <- list()
-mods[["m_null"]] <- summary(lmer(prov[,Variable[M]] ~ 1 + (1|ID_pair_F), data = prov,REML = F))
+mods[["m_null"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + (1|ID_pair_F), data = prov,REML = F))
 mods[["m_1"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + PC_F + (1|ID_pair_F), data = prov, REML = F))
 mods[["m_2"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + PC_F*Season_F + (1|ID_pair_F), data = prov, REML = F))
 mods[["m_3"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + PC_M + (1|ID_pair_F), data = prov, REML = F))
@@ -379,7 +355,7 @@ write.csv(aictab, file=paste("PC1_AIC", files[FF], Variable[M],".csv",sep="_"))
 
 # ==== 1.2 COEFS TABLE  ====
 mods <- list()
-mods[["m_null"]] <- summary(lmer(prov[,Variable[M]] ~ 1 + (1|ID_pair_F), data = prov, REML = T))
+mods[["m_null"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + (1|ID_pair_F), data = prov, REML = T))
 mods[["m_1"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + PC_F + (1|ID_pair_F), data = prov, REML = T))
 mods[["m_2"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + PC_F*Season_F + (1|ID_pair_F), data = prov, REML = T))
 mods[["m_3"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + PC_M + (1|ID_pair_F), data = prov, REML = T))
@@ -388,7 +364,7 @@ mods[["m_5"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + PC_M + PC_F + (1|ID
 mods[["m_6"]] <- summary(lmer(prov[,Variable[M]] ~ moose_M + PC_M * PC_F + (1|ID_pair_F), data = prov, REML = T))
 
 modSS <- list()
-modSS[["m_null"]] <- lmer(prov[,Variable[M]] ~ 1 + (1|ID_pair_F), data = prov, REML = T)
+modSS[["m_null"]] <- lmer(prov[,Variable[M]] ~ moose_M + (1|ID_pair_F), data = prov, REML = T)
 modSS[["m_1"]] <- lmer(prov[,Variable[M]] ~ moose_M + PC_F + (1|ID_pair_F), data = prov, REML = T)
 modSS[["m_2"]] <- lmer(prov[,Variable[M]] ~ moose_M + PC_F*Season_F + (1|ID_pair_F), data = prov, REML = T)
 modSS[["m_3"]] <- lmer(prov[,Variable[M]] ~ moose_M + PC_M + (1|ID_pair_F), data = prov, REML = T)

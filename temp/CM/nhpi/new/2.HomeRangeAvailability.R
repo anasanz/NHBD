@@ -58,9 +58,10 @@ for (i in 1:length(ID)){
   
   set.seed(i)
   #draw random points
-  rdm.mcp.sp <- spsample(mcpid, n.rdm.pts, type="random", iter = 10)
+  # use 10 
+  rdm.mcp.sp <- spsample(mcpid, n.rdm.pts*10, type="random", iter = 500)
   set.seed(i+3)#picked a value randomly
-  rdm.kern.sp <- spsample(kernid, n.rdm.pts, type="random", iter = 10)
+  rdm.kern.sp <- spsample(kernid, n.rdm.pts*10, type="random", iter = 500)
   
   plot(mcpid)
   points(rdm.mcp.sp)
@@ -98,9 +99,10 @@ for (i in 1:length(ID)){
   
   set.seed(i)
   #draw random points
-  rdm.mcp.sp <- spsample(mcpid, n.rdm.pts, type="random", iter = 10)
+  #use 20
+  rdm.mcp.sp <- spsample(mcpid, n.rdm.pts*20, type="random", iter = 500)
   set.seed(i+3)#picked a value randomly
-  rdm.kern.sp <- spsample(kernid, n.rdm.pts, type="random", iter = 10)
+  rdm.kern.sp <- spsample(kernid, n.rdm.pts*20, type="random", iter = 500)
   
   plot(mcpid)
   points(rdm.mcp.sp)
@@ -234,7 +236,7 @@ for(i in 1:length(id_terr)){
 
 # ==== IV. WRITE FILE ==== 
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/new")
-write.csv(data.mcp, "all_points.not.moved_MCP.csv")
+write.csv(data.move.kern, "all_points.not.moved_MCP.csv")
 write.csv(data.kern, "all_points.not.moved_KERN.csv")
 
 
