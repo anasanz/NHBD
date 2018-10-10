@@ -56,12 +56,12 @@ for (i in 1:length(ID)){
   tmp <- gps[gps$Study_year==ID[i],]
   n.rdm.pts <- nrow(tmp)
   
-  set.seed(i)
+  set.seed(i+1)
   #draw random points
   # use 10 
-  rdm.mcp.sp <- spsample(mcpid, n.rdm.pts*10, type="random", iter = 500)
-  set.seed(i+3)#picked a value randomly
-  rdm.kern.sp <- spsample(kernid, n.rdm.pts*10, type="random", iter = 500)
+  rdm.mcp.sp <- spsample(mcpid, n.rdm.pts*15, type="random", iter = 500)
+  set.seed(i+1)#picked a value randomly
+  rdm.kern.sp <- spsample(kernid, n.rdm.pts*15, type="random", iter = 500)
   
   plot(mcpid)
   points(rdm.mcp.sp)
@@ -97,12 +97,12 @@ for (i in 1:length(ID)){
   tmp <- gps[gps$Study_year==ID[i] & gps$move==1,]
   n.rdm.pts <- nrow(tmp)
   
-  set.seed(i)
+  set.seed(i+1)
   #draw random points
   #use 20
-  rdm.mcp.sp <- spsample(mcpid, n.rdm.pts*20, type="random", iter = 500)
-  set.seed(i+3)#picked a value randomly
-  rdm.kern.sp <- spsample(kernid, n.rdm.pts*20, type="random", iter = 500)
+  rdm.mcp.sp <- spsample(mcpid, n.rdm.pts*30, type="random", iter = 500)
+  set.seed(i+1)#picked a value randomly
+  rdm.kern.sp <- spsample(kernid, n.rdm.pts*30, type="random", iter = 500)
   
   plot(mcpid)
   points(rdm.mcp.sp)
@@ -245,9 +245,4 @@ write.csv(data.move.mcp, "all_points.move_MCP.csv")
 write.csv(data.move.kern, "all_points.move_KERN.csv")
 
 
-
-####
-rm(list=ls())
-library(rgdal)
-library(raster)
 
