@@ -1,6 +1,7 @@
 rm(list=ls())
 library(dplyr) 
 library(lme4) 
+library(MuMIn)
 ### ==== I. CHECK CORRELATION BETWEEN VARIABLES ====
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data")
 files <- c("all_points.not.moved_MCP", "all_points.not.moved_KERN",
@@ -28,7 +29,7 @@ Model <- list(closest = c("Study_year", "used", "forest_pro", "clip_dem",
               "tri5", "main25m", "cov_build","closest"))
 Variable <- c("closest2_M","closest_M")
 
-
+dredge_models <- list()
 
 thresholdNBGPS <- c(250,250,50,55)
 # thresholdNBGPS <- c(0,0,0,0)
@@ -42,8 +43,9 @@ levels(unique(d1$Study_year))
 
 ### ---- 1. SELECT THE VARIABLES FOR THE MODEL ====
 M=1
+dredge_models[[FF]] <- list()  
+
 for(M in 1:length(Model)){
-  
 d <- d1[ , which(colnames(d1) %in% Model[[M]])]
 
 #keep moose here 
@@ -63,7 +65,7 @@ m <- data.frame(m)
 colnames(m) <- c("Study_year","(Intercept)",Model[[M]][3:8],"moose")
 rownames(m) <- IDD
 glm.list <- list()
-
+dredge_mod <- list()
 ## RUN GLM
 for(i in 1:length(IDD)){
   data1 <- dat <- d[d$Study_year==IDD[i],] # Select one territory
@@ -82,12 +84,23 @@ for(i in 1:length(IDD)){
        family = binomial (link = "logit"),
        data =df )
   
+  ##
+  # dredge needs argument: na.action = na.fail. remove some nas. 
+  df[is.na(df)] <- 0
+  
+  mod <- glm ( form, # Run model
+              family = binomial (link = "logit"), na.action = na.fail,
+              data =df )
+  
+  dredge_mod[[i]]<- dredge(mod)
+  
   # STORE RESULTS FROM THE GLM 
   glm.list.coef <- as.data.frame(glm.list[[i]]$coefficients) # Store it
   m[i, as.character(rownames(glm.list.coef))] <- glm.list[[i]]$coefficients
   m[i, "moose"] <- dat$moose[1]
   
 } 
+dredge_models[[FF]][[M]] <- dredge_mod
 glm.m <- m
 glm.m$Study_year <- rownames(glm.m)
 
@@ -99,3 +112,33 @@ plot(glm.m$forest_pro~glm.m$moose)
 
 }
 }
+
+
+
+## MAKE THE TABLE WITH AIC
+#in row= territory, in columns= model
+# just an example for the the FF=1 and M=1 
+
+FF= 1 #all_points.not.moved_MCP
+M= 1 #closest = c("Study_year", "used", "forest_pro", "clip_dem","tri5", "main25m", "X2nd25m","closest2")
+
+number_of_models <- nrow(dredge_models[[FF]][[M]][[1]])
+number_of_variables <- 6 # this is number of variable you have entered in the full model (maximal)
+AICTAB <- matrix(NA, nrow=length(IDD), ncol=number_of_models)
+row.names(AICTAB)<- IDD
+
+## ugly trick to give colnames to AIC table
+names.variables <- colnames(dredge_models[[FF]][[M]][[i]][1,c(2:(number_of_variables+1))])
+names.col <- 0
+for(i in 1: ncol(AICTAB)){
+  names.col[i] <- paste(names.variables[!is.na(dredge_models[[FF]][[M]][[1]][i,c(2:(number_of_variables+1))])],collapse ="+")
+}
+colnames(AICTAB) <- names.col
+
+## fill in AIC table 
+for(i in 1:length(IDD)){
+AICTAB[i,]<- dredge_models[[FF]][[M]][[i]][c(1:number_of_models),"AICc"]
+}
+
+
+

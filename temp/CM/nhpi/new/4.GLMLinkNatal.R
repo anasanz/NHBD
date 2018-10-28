@@ -90,7 +90,7 @@ for(i in 1:length(IDD)){
 } 
 glm.m <- m
 glm.m$Study_year <- rownames(glm.m)
-write.csv(glm.m, file=paste("GLM", files[FF], Variable[M],".pdf",sep="_"))
+write.csv(glm.m, file=paste("GLM", files[FF], Variable[M],".csv",sep="_"))
 
 ## CHECK AND SUBSET TERRITORIES 
 # t <- d[which(d$territory == "Tandsjon_2012_s"), ]
@@ -143,16 +143,24 @@ n <- natal[ ,colnames(natal) %in% c("Territory_antonio", "ID", "human_1", "human
 
 sd_n <- as.data.frame(scale(n[3:8]))
 pc <- prcomp(sd_n)
-fviz_pca_biplot(pc, label="var",col.var = "black") +
-  theme(text = element_text(size = 15),
-        panel.background = element_blank(), 
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key = element_rect(fill = "white"))
+dimnames(pc$rotation)[[1]] <- c("HDens", "Hum", "agri", "2rds", "1rds", "Build")
+
+# repel = list(what = "label", width = 0.5, height = 0.1))
+fviz_pca_biplot(pc,
+                label = "var",
+                col.var = "black",
+                repel = TRUE)  +
+  theme(
+    text = element_text(size = 15),
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    legend.key = element_rect(fill = "white")
+  )
 pc$x
-pc$sdev/sum(pc$sdev)
-pc$x[ ,1] #PC1 explains 72% of the variance and separates human (+) vS non-human (-) 
+pc$sdev / sum(pc$sdev)
+pc$x[, 1] #PC1 explains 72% of the variance and separates human (+) vS non-human (-)
 # characterized territories
 # However, PC1 doesnt capture the difference in sec. roads, which is more captured by PC2
 natal$PC <- pc$x[ ,1] 
