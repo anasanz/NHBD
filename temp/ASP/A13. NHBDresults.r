@@ -13,13 +13,13 @@ library(survival)
 
 # ---- LOAD DATA ----
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/Datos")
 e<-read.csv("Data_NHBD_id_wolf_density.csv")
 e<-e[,-c(1,2)]
   
 #Add dispersal distances
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
-disper <- read.delim("C:/Users/Ana/Desktop/MASTER THESIS/Data/dispersal_p.txt")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data")
+disper <- read.delim("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data/dispersal_p.txt")
 disperB<-disper[ ,c("X_birth","Y_birth")]
 disperE<-disper[ ,c("X_Established","Y_Established")]
 x1<-as.matrix(disperB)
@@ -61,17 +61,17 @@ for(i in 1:length(ID)){
 }
 
 #Save file with dispersal distances
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/Datos")
 write.csv(e1,"Data_NHBD_id_wolf_density_distances.csv") # Short (<40000), Medium (<200000), Long (>200000)
 
 
 # Different cluster divisions
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Multivariate")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data/Multivariate")
 clu <- read.csv("ManyClusters")
   
   
 # Different clustering methods
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Multivariate")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data/Multivariate")
 m <- read.csv("ManyClusterMethods")
 
 # --- check correlations 
@@ -10426,12 +10426,12 @@ df[df$Sex=="F" & df$Trajectory=="Long" & df$Method=="10C",c(4:8)] <- c(values[1]
 
 # 1---- RESULTS GRAPH ----
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
-write.csv(df, "Results_NHBD.csv")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
+write.csv(df, "Results_NHBD_2_runagain_no_util.csv")
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
 r <- read.csv("Results_NHBD.csv", sep = ",")
-
+par(mfrow = c(1,1))
 # Males
 r <- r[c(1:30),c(3:7)]
 #rescale dist 
