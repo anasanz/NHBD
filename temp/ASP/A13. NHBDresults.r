@@ -64,6 +64,14 @@ for(i in 1:length(ID)){
 setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/Datos")
 write.csv(e1,"Data_NHBD_id_wolf_density_distances.csv") # Short (<40000), Medium (<200000), Long (>200000)
 
+# Histogram for appendix with distribution of disperal distances M/F
+ddis_M <- e1[which(e1$Category == "Natal" & e1$Sex == "M"), ]
+options(scipen = 3)
+hist(ddis_M$dist, col = "grey", xlab = "Dispersal distance (m)", main = "Males (n = 140)")
+
+ddis_F <- e1[which(e1$Category == "Natal" & e1$Sex == "F"),]
+options(scipen = 3)
+hist(ddis_F$dist, col = "grey", xlab = "Dispersal distance (m)", main = "Females (n = 131)")
 
 # Different cluster divisions
 setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data/Multivariate")
