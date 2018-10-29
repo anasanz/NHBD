@@ -10481,7 +10481,7 @@ abline(h=0, lty=2)
 
 # Females
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
 r <- read.csv("Results_NHBD.csv", sep = ",")
 r <- r[c(31:60),c(3:7)]
 
