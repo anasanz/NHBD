@@ -176,13 +176,20 @@ summary(lm4)
 plot(lm4)
 
 
+<<<<<<< HEAD
+# ---- 3. New coefficients including distance to closest human feature
+# The variable "closest" is distance to closest human feature including main roads, buildings and sec. roads
+# The variable "closest2" is distance to closest human feature including only main roads and buildings
+
+
 # ---- 3. New coefficients including distance to closest human feature ----
     # ---- 3.1. The variable "closest" is distance to closest human feature including main roads, buildings and sec. roads ----
+
 setwd("~/Norway/NHBD_humans/Antonio")
 d <- read.csv("covariates_Antonio.csv")
 
 d <- d[ , which(colnames(d) %in% c("territory", "used", "forest_pro", "clip_dem",
-                                   "tri5", "main25m", "X2nd25m", "cov_build", "closest"))]
+                                   "tri5", "main25m", "X2nd25m", "cov_build", "closest2"))]
 
 # Scale by territory
 terr <- unique(d$territory) 
@@ -198,7 +205,7 @@ IDD <- unique(d$territory)
 m <- matrix(NA, ncol=9, nrow=length(unique(d$territory)))
 m <-data.frame(m)
 colnames(m) <- c("territory","(Intercept)", "forest_pro","tri5", 
-                 "clip_dem", "main25m", "X2nd25m", "cov_build", "closest")
+                 "clip_dem", "main25m", "X2nd25m", "cov_build", "closest2")
 rownames(m) <- IDD
 
 glm.list <-list()
@@ -240,6 +247,7 @@ tapply(d_used$territory, d_used$territory, length) # There are territories with 
 
 
 setwd("~/Norway/NHBD_humans")
+
 write.csv(m,"coef_human.csv")
 
 
@@ -293,4 +301,5 @@ m$territory <- rownames(m)
 
 
 setwd("~/Norway/NHBD_humans")
+
 write.csv(m,"coef_human2.csv")

@@ -13,13 +13,13 @@ library(survival)
 
 # ---- LOAD DATA ----
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/Datos")
 e<-read.csv("Data_NHBD_id_wolf_density.csv")
 e<-e[,-c(1,2)]
   
 #Add dispersal distances
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data")
-disper <- read.delim("C:/Users/Ana/Desktop/MASTER THESIS/Data/dispersal_p.txt")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data")
+disper <- read.delim("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data/dispersal_p.txt")
 disperB<-disper[ ,c("X_birth","Y_birth")]
 disperE<-disper[ ,c("X_Established","Y_Established")]
 x1<-as.matrix(disperB)
@@ -61,17 +61,25 @@ for(i in 1:length(ID)){
 }
 
 #Save file with dispersal distances
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/Datos")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/Datos")
 write.csv(e1,"Data_NHBD_id_wolf_density_distances.csv") # Short (<40000), Medium (<200000), Long (>200000)
 
+# Histogram for appendix with distribution of disperal distances M/F
+ddis_M <- e1[which(e1$Category == "Natal" & e1$Sex == "M"), ]
+options(scipen = 3)
+hist(ddis_M$dist, col = "grey", xlab = "Dispersal distance (m)", main = "Males (n = 140)")
+
+ddis_F <- e1[which(e1$Category == "Natal" & e1$Sex == "F"),]
+options(scipen = 3)
+hist(ddis_F$dist, col = "grey", xlab = "Dispersal distance (m)", main = "Females (n = 131)")
 
 # Different cluster divisions
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Multivariate")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data/Multivariate")
 clu <- read.csv("ManyClusters")
   
   
 # Different clustering methods
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Data/Multivariate")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Data/Multivariate")
 m <- read.csv("ManyClusterMethods")
 
 # --- check correlations 
@@ -10426,12 +10434,15 @@ df[df$Sex=="F" & df$Trajectory=="Long" & df$Method=="10C",c(4:8)] <- c(values[1]
 
 # 1---- RESULTS GRAPH ----
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
-write.csv(df, "Results_NHBD.csv")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
+write.csv(df, "Results_NHBD_2_runagain_no_util.csv")
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
 r <- read.csv("Results_NHBD.csv", sep = ",")
 
+#setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 5/Figures")
+#pdf("Fig2_males.pdf")
+par(mfrow = c(1,1))
 # Males
 r <- r[c(1:30),c(3:7)]
 #rescale dist 
@@ -10452,20 +10463,31 @@ cc <- palette()
 c <- palette(c(cc,"purple","brown"))
 c[c=="yellow"] <- "orange"
 # rescale dist
-par(mfrow=c(1,2))
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 5/Figures")
+pdf("Fig2_males.pdf")
+par(mfrow=c(1,1),
+    oma = c(2,2,2,3),
+    mar = c(3.5, 5, 2, 2))
 plot(-30,ylim = c(-7,10), xlim=c(0,34),
-     pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "NHBD", xlab = " ", axes = FALSE, main = "Males")
+     pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "NHBD", xlab = " ", axes = FALSE, main = "Male", cex.main = 1.6, cex.lab = 1.4)
 axis(1,lwd.tick=0, labels = FALSE)
 axis(1,at=c(11,22),labels=c("",""))
 
-axis(1,at=c(6,16,29),labels=c("Short","Medium","Long"),tick = 0)
+axis(1,at=c(6,16,29),labels=c("Short","Medium","Long"),tick = 0, cex.axis = 1.2)
+mtext("  (n = 14)           (n = 89)                  (n = 37)", side = 1, line = 2, cex = 1.2)
 
-axis(2)
+axis(2, cex.axis = 1.2)
 arrows(x,r$CI.2.5, x, r$CI.97.5, code=3, angle=90, length=0.04,col=c[r$Method])
 points(r$NHBD,
      pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5))
 
 abline(h=0, lty=2)
+
+legend(x=17,y=9, legend = unique(r$Method)[1:5], col = c[r$Method][1:5],
+       pch = 18, cex = 1.2,bty="o",bg=grey(0.9),box.col=grey(0.9) )
+legend(x=29,y=9, legend = unique(r$Method)[6:10], col = c[r$Method][6:10],
+       pch = 18, cex = 1.2,bty="o",bg=grey(0.9),box.col=grey(0.9)  )
+dev.off()
 
 
 # For 8C and 9C cluster divisions, there is no individuals that establishes in the
@@ -10473,7 +10495,7 @@ abline(h=0, lty=2)
 
 # Females
 
-setwd("C:/Users/Ana/Desktop/MASTER THESIS/Publication/SUBMISSION 3")
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
 r <- read.csv("Results_NHBD.csv", sep = ",")
 r <- r[c(31:60),c(3:7)]
 
