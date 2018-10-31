@@ -144,10 +144,13 @@ n <- natal[ ,colnames(natal) %in% c("Territory_antonio", "ID", "human_1", "human
 sd_n <- as.data.frame(scale(n[3:8]))
 pc <- prcomp(sd_n)
 dimnames(pc$rotation)[[1]] <- c("HDens", "Hum", "agri", "2rds", "1rds", "Build")
-
+# dimnames(pc$rotation)[[1]] <- c("HDens", "Bef", "Dyrk", "SkVei", "HoVei", "Bygn")
+dimnames(pc$rotation)
 # repel = list(what = "label", width = 0.5, height = 0.1))
 fviz_pca_biplot(pc,
                 label = "var",
+                # xlab="Hovedkomponent 1 (58.6%)",
+                # ylab="Hovedkomponent 2 (26.2%)",
                 col.var = "black",
                 repel = TRUE)  +
   theme(
