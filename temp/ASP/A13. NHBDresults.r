@@ -10512,10 +10512,10 @@ c[c=="yellow"] <- "orange"
 
 #plotf
 setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 5/Figures")
-pdf("Fig2_females.pdf")
+pdf("Fig2_females2.pdf")
 par(mfrow=c(1,1),
-    oma = c(2,2,2,3),
-    mar = c(3.5, 5, 2, 2))
+    oma = c(4,2,2,4),
+    mar = c(4, 4, 4, 2))
 plot(-30,ylim = c(-7,10), xlim=c(0,34),
      pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "NHBD", xlab = " ", axes = FALSE, main = "Female", cex.main = 1.6, cex.lab = 1.4)
 axis(1,lwd.tick=0, labels = FALSE)
@@ -10532,22 +10532,129 @@ points(r$NHBD,
 abline(h=0, lty=2)
 
 legend(x=17,y=9, legend = unique(r$Method)[1:5], col = c[r$Method][1:5],
-      pch = 18, cex = 1.2,bty="o",bg=grey(0.9),box.col=grey(0.9) )
+       pch = 18, cex = 1.2,bty="o",bg=grey(0.9),box.col=grey(0.9) )
 legend(x=29,y=9, legend = unique(r$Method)[6:10], col = c[r$Method][6:10],
-      pch = 18, cex = 1.2,bty="o",bg=grey(0.9),box.col=grey(0.9)  )
+       pch = 18, cex = 1.2,bty="o",bg=grey(0.9),box.col=grey(0.9)  )
 dev.off()
 
+# 1---- RESULTS GRAPH NORWEGIAN ----
+
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
+write.csv(df, "Results_NHBD_2_runagain_no_util.csv")
+
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
+r <- read.csv("Results_NHBD.csv", sep = ",")
+
+# Males
+r <- r[c(1:30),c(3:7)]
+#rescale dist 
+r[r$Method=="Dist" ,3:5] <- r[r$Method=="Dist",3:5] *100*-1
+#Remove methods that dont converge
+r[r$Trajectory=="Short" & r$Method=="Hier_6C",3:5] <- NA
+r[r$Trajectory=="Long" & r$Method=="8C",3:5] <- NA
+r[r$Trajectory=="Long" & r$Method=="9C",3:5] <- NA
+r[r$Trajectory=="Long" & r$Method=="10C",3:5] <- NA
+r[r$Trajectory=="Long" & r$Method=="Kmeans_6C",3:5] <- NA
+
+r <- data.frame( rbind(head(r, 10), NA, tail(r, -10)), row.names = NULL)
+r <- data.frame( rbind(head(r, 21), NA, tail(r, -21)), row.names = NULL)
+
+x <- seq_along(r$NHBD)
+
+cc <- palette()
+c <- palette(c(cc,"purple","brown"))
+c[c=="yellow"] <- "orange"
+# Change names for norwegian legend
+r$Method <- as.character(r$Method)
+r$Method[r$Method == "Dist"] <- "Avst"
+r$Method[r$Method == "Kmeans_6C"] <- "Kmeans_6gr"
+r$Method[r$Method == "Pam_6C"] <- "Pam_6gr"
+r$Method[r$Method == "Hier_6C"] <- "Hier_6gr"
+r$Method[r$Method == "4C"] <- "4gr"
+r$Method[r$Method == "5C"] <- "5gr"
+r$Method[r$Method == "7C"] <- "7gr"
+r$Method[r$Method == "8C"] <- "8gr"
+r$Method[r$Method == "9C"] <- "9gr"
+r$Method[r$Method == "10C"] <- "10gr"
+r$Method <- as.factor(r$Method)
+
+
+# rescale dist
 setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 5/Figures")
-pdf("Fig2_females2.pdf")
+pdf("Fig2_males_nor.pdf")
 par(mfrow=c(1,1),
     oma = c(4,2,2,4),
     mar = c(4, 4, 4, 2))
 plot(-30,ylim = c(-7,10), xlim=c(0,34),
-     pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "NHBD", xlab = " ", axes = FALSE, main = "Female", cex.main = 1.6, cex.lab = 1.4)
+     pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "OPHP", xlab = " ", axes = FALSE, main = "Hanner", cex.main = 1.6, cex.lab = 1.4)
 axis(1,lwd.tick=0, labels = FALSE)
 axis(1,at=c(11,22),labels=c("",""))
 
-axis(1,at=c(6,16,29),labels=c("Short","Medium","Long"),tick = 0, cex.axis = 1.2)
+axis(1,at=c(6,16,29),labels=c("Kort","Middels","Lang"),tick = 0, cex.axis = 1.2)
+mtext("  (n = 14)           (n = 89)                  (n = 37)", side = 1, line = 2, cex = 1.2)
+
+axis(2, cex.axis = 1.2)
+arrows(x,r$CI.2.5, x, r$CI.97.5, code=3, angle=90, length=0.04,col=c[r$Method])
+points(r$NHBD,
+       pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5))
+
+abline(h=0, lty=2)
+
+legend(x=17,y=9, legend = unique(r$Method)[1:5], col = c[r$Method][1:5],
+       pch = 18, cex = 1.2,bty="o",bg=grey(0.9),box.col=grey(0.9) )
+legend(x=29,y=9, legend = unique(r$Method)[6:10], col = c[r$Method][6:10],
+       pch = 18, cex = 1.2,bty="o",bg=grey(0.9),box.col=grey(0.9)  )
+dev.off()
+
+
+# For 8C and 9C cluster divisions, there is no individuals that establishes in the
+# same cluster for long dispersing males (There is no E = 1 in the Category 1)
+
+# Females
+
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 3")
+r <- read.csv("Results_NHBD.csv", sep = ",")
+r <- r[c(31:60),c(3:7)]
+
+#rescale dist 
+r[r$Method=="Dist" ,3:5] <- r[r$Method=="Dist",3:5] *100*-1
+#r[r$Trajectory=="Long" & r$Method=="8C",3:5] <- NA
+#r[r$Trajectory=="Long" & r$Method=="9C",3:5] <- NA
+
+r <- data.frame( rbind(head(r, 10), NA, tail(r, -10)), row.names = NULL)
+r <- data.frame( rbind(head(r, 21), NA, tail(r, -21)), row.names = NULL)
+
+x <- seq_along(r$NHBD)
+
+cc <- palette()
+c <- palette(c(cc,"purple","brown"))
+c[c=="yellow"] <- "orange"
+# Change names for norwegian legend
+r$Method <- as.character(r$Method)
+r$Method[r$Method == "Dist"] <- "Avst"
+r$Method[r$Method == "Kmeans_6C"] <- "Kmeans_6gr"
+r$Method[r$Method == "Pam_6C"] <- "Pam_6gr"
+r$Method[r$Method == "Hier_6C"] <- "Hier_6gr"
+r$Method[r$Method == "4C"] <- "4gr"
+r$Method[r$Method == "5C"] <- "5gr"
+r$Method[r$Method == "7C"] <- "7gr"
+r$Method[r$Method == "8C"] <- "8gr"
+r$Method[r$Method == "9C"] <- "9gr"
+r$Method[r$Method == "10C"] <- "10gr"
+r$Method <- as.factor(r$Method)
+
+#plotf
+setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 5/Figures")
+pdf("Fig2_females_nor.pdf")
+par(mfrow=c(1,1),
+    oma = c(4,2,2,4),
+    mar = c(4, 4, 4, 2))
+plot(-30,ylim = c(-7,10), xlim=c(0,34),
+     pch = 21, col = c[r$Method],bg=adjustcolor(c[r$Method],alpha.f = 0.5) , ylab = "OPHP", xlab = " ", axes = FALSE, main = "Tisper", cex.main = 1.6, cex.lab = 1.4)
+axis(1,lwd.tick=0, labels = FALSE)
+axis(1,at=c(11,22),labels=c("",""))
+
+axis(1,at=c(6,16,29),labels=c("Kort","Middels","Lang"),tick = 0, cex.axis = 1.2)
 mtext("  (n = 39)           (n = 77)                  (n = 15)", side = 1, line = 2, cex = 1.2)
 
 axis(2, cex.axis = 1.2)
