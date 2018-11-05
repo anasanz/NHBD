@@ -10461,7 +10461,7 @@ c <- palette(c(cc,"purple","brown"))
 c[c=="yellow"] <- "orange"
 # rescale dist
 setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 5/Figures")
-pdf("Fig2_males2.pdf")
+pdf("Fig2_males.pdf")
 par(mfrow=c(1,1),
     oma = c(4,2,2,4),
     mar = c(4, 4, 4, 2))
@@ -10512,7 +10512,7 @@ c[c=="yellow"] <- "orange"
 
 #plotf
 setwd("C:/Users/Ana/Documents/Norway/MASTER THESIS/Publication/SUBMISSION 5/Figures")
-pdf("Fig2_females2.pdf")
+pdf("Fig2_females.pdf")
 par(mfrow=c(1,1),
     oma = c(4,2,2,4),
     mar = c(4, 4, 4, 2))
