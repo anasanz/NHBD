@@ -103,10 +103,11 @@ write.csv(glm.m, file=paste("GLM", files[FF], Variable[M],".csv",sep="_"))
 # 
 
 ### ---- 5. PCA TO CHARACTERISE NATAL TERRITORY  ====
-setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/New/")
+ setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/nhbd_2/data/New/")
+ setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/natal_habitat_biased_dispersal/nhbd/NHBD/temp/CM/nhpi/new")
 v <- read.csv("natal_values_complete.csv", header = TRUE) #Load extracted natal values
 v$ID_pair <- paste(v$ID_F, v$ID_M, sep = "_") # Create ID_pair column to add it as random in the model
-
+v$Territory_antonio
 ### ----  5.1  JOIN FEMALES-MALES (Same variable names) ----
 # Sort out females
 f <- v[ , which(colnames(v) %in% c("Territory_antonio","ID_F", "F_human_1", "F_humanlands_1", "F_agri_1", "F_forest_1",
@@ -180,6 +181,7 @@ natal[which(natal$PC2 < -4), ] # Stadra
 
 ### ---- 6. LINK PCA SCORES WITH NATAL TERRITORY  ====
 colnames(glm.m)[1] <- "Territory_antonio"
+
 e <- left_join(natal, glm.m, by = "Territory_antonio") 
 
 e <- e[which(!is.na(e$forest_pro)),]
@@ -278,7 +280,7 @@ abline(lm(prov[,Variable[M]] ~ prov$PC_F))
 summary(lm(prov[,Variable[M]] ~ prov$PC_F))
 
 # ==== 2.1 SEASON ====
-Variable.axis <- c("Beta distance humans","Beta distance all humans")
+Variable.axis <- c("Beta distance to main human features","Beta distance all humans features")
 
 # ==== 2.1.1 PC1 ====
 setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/NHBD2/figures")
@@ -308,6 +310,7 @@ pdf(file=paste("Females_PC1", files[FF], Variable[M],".pdf",sep="_"))
 plot(prov$PC_F, prov[,Variable[M]], pch = 16, xlab = "PC1", ylab=Variable.axis[M])
 # plot lines
 abline(lm(prov[,Variable[M]] ~ prov$PC_F), col = "black") #Summer
+abline(h=0, lty=2, col="grey")
 dev.off()
 
 

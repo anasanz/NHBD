@@ -41,14 +41,16 @@ for(i in 1:nrow(mcp_100_rtp)){
   colo[i] <- col[which(idd ==mcp_100_rtp$group[i])]
 }
 
+
 bm <- dc + geom_polygon(data = mcp_100_rtp ,
                        aes(long, lat, group = group),
                        fill = colo, colour = colo, alpha = rep(0.4, length(colo)))
 bm
 
 # ==== III. LOAD NATAL TERRITORY LOCATION AND MAKE ARROWS ====
-setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/natal_habitat_biased_dispersal/nhbd/NHBD/temp/ASP/NHBD_Humans/Data")
-hum <- read.csv("data_pairs_human_complete.csv", sep = ";")
+# setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/natal_habitat_biased_dispersal/nhbd/NHBD/temp/ASP/NHBD_Humans/Data")
+setwd("C:/Personal_Cloud/OneDrive/Work/Skandulv/natal_habitat_biased_dispersal/nhbd/NHBD/temp/CM/nhpi/new")
+hum <- read.csv("data_pairs_human_complete.csv")
 split <- strsplit(as.character(hum$Territory_antonio), "_")
 hum$Territory_antonio <- sapply(split, function(x) x[1])
 hum <- hum[hum$Territory_antonio!="Forshyttan",]
@@ -78,6 +80,15 @@ for(i in 1:nrow(Female)){
   
 }
 
+
+plot(mcp_100,col=col)
+for(i in 10){
+segments(x1=female.arraows[i,1],
+         y1=female.arraows[i,2], 
+         x0=female.arraows[i,3],
+         y0=female.arraows[i,4])
+}
+plot(mcp_100[12,],col="red",add=T)
 
 
 
